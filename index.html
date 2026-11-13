@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>แปลงข้อความไทม์ไลน์งานอัตโนมัติ</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--tx:#1c2333;--mut:#6b7488;--bd:#e2e7f1;--pri:#3b6cf6;--ok:#16a34a;--warn:#d97706;--bad:#dc2626;--chip:#eef2ff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1420;--card:#192032;--tx:#e8ecf5;--mut:#9aa4bb;--bd:#2a3350;--pri:#7c9cff;--ok:#4ade80;--warn:#fbbf24;--bad:#f87171;--chip:#232c47;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1420;--card:#192032;--tx:#e8ecf5;--mut:#9aa4bb;--bd:#2a3350;--pri:#7c9cff;--ok:#4ade80;--warn:#fbbf24;--bad:#f87171;--chip:#232c47;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Noto Sans Thai","Sarabun",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.55}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+h1{font-size:1.35rem;margin:4px 0 2px}
+.sub{color:var(--mut);font-size:.9rem;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:1fr 1.2fr;gap:14px}
+@media(max-width:820px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px}
+textarea{width:100%;min-height:330px;resize:vertical;border:1px solid var(--bd);border-radius:10px;padding:10px;background:var(--bg);color:var(--tx);font:13px/1.5 ui-monospace,Menlo,Consolas,monospace}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button{border:1px solid var(--bd);background:var(--chip);color:var(--tx);padding:8px 12px;border-radius:10px;cursor:pointer;font:inherit;font-size:.88rem}
+button.p{background:var(--pri);color:#fff;border-color:var(--pri)}
+.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:12px}
+.stat{background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:8px 10px}
+.stat b{display:block;font-size:1.05rem}.stat span{font-size:.75rem;color:var(--mut)}
+.status{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;margin-bottom:12px;font-weight:600}
+.status.done{background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok)}
+.status.prog{background:color-mix(in srgb,var(--warn) 15%,transparent);color:var(--warn)}
+.status .em{font-size:1.8rem}
+h3{font-size:.95rem;margin:14px 0 8px}
+.people{display:flex;flex-wrap:wrap;gap:8px}
+.pp{background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;font-size:.85rem;min-width:150px}
+.pp b{display:block}.pp small{color:var(--mut)}
+.day{font-weight:700;margin:14px 0 6px;color:var(--pri);font-size:.9rem}
+.ev{display:flex;gap:10px;padding:8px 0;border-left:2px solid var(--bd);margin-left:10px;padding-left:12px;position:relative}
+.ev:before{content:"";position:absolute;left:-6px;top:14px;width:10px;height:10px;border-radius:50%;background:var(--c,var(--pri))}
+.t{font:600 .85rem ui-monospace,Menlo,monospace;min-width:44px;color:var(--mut)}
+.ic{font-size:1.25rem;line-height:1.2}
+.bd{flex:1;min-width:0}
+.bd .h{font-weight:600;font-size:.92rem}
+.bd .x{font-size:.84rem;color:var(--mut);overflow-wrap:anywhere}
+.tag{display:inline-block;font-size:.7rem;padding:1px 7px;border-radius:99px;background:var(--chip);margin-left:6px;color:var(--mut)}
+.mood{font-size:1.4rem}
+.gap{margin:2px 0 2px 22px;font-size:.75rem;color:var(--mut)}
+.empty{color:var(--mut);text-align:center;padding:40px 0}
+.err{color:var(--bad);font-size:.85rem}
+.full{min-height:200px;font-size:12.5px;line-height:1.65;white-space:pre-wrap;overflow:auto}
+.estg{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:8px}.estg label{display:flex;flex-direction:column;font-size:.78rem;color:var(--mut);gap:3px}.estg input,.estg select{padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit;font-size:.9rem}#est table td,#est table th{padding:3px 6px;text-align:left}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🧾 แปลงข้อความไทม์ไลน์งานอัตโนมัติ</h1>
+  <div class="sub">วางข้อความจากระบบ แล้วผลจะแสดงทันที พร้อมคำอธิบายและอิโมจิอารมณ์ของแต่ละเหตุการณ์</div>
+  <div class="grid">
+    <div class="card">
+      <b>📥 ป้อนข้อความ</b>
+      <input id="ttl" placeholder="เลขงาน / หัวข้อ (ไม่บังคับ) เช่น JB26-xxxxxxx · ชื่อลิงก์" style="width:100%;margin:8px 0;padding:9px 10px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit;font-size:.9rem"><textarea id="in" spellcheck="false" placeholder="วางข้อความที่นี่..."></textarea>
+      <div class="btns">
+        <button class="p" id="ex">✨ ใส่ข้อความตัวอย่าง</button>
+        <button id="cp">📋 คัดลอกสรุป</button>
+        <button id="cl">🗑️ ล้าง</button>
+      </div>
+    </div>
+    <div class="card" id="out"></div>
+  </div>
+  <div class="card" id="est" style="margin-top:14px">
+    <b>🧮 ประเมินเวลาตัดต่อซ่อมเคเบิล</b>
+    <div class="sub" style="margin:4px 0 10px">เกณฑ์ (กรณีไม่ติดขัด): ต่อ 1 core ≤ 30 วินาที · หัวต่อ 12 core ต่อ+เก็บ+ปลอกสาย = 30 นาที/หัว · ข้ามถนน ≤ 15 นาที/เส้น (ใช้คนไม่ต่ำกว่า 4 คน)</div>
+    <div class="estg">
+      <label>จำนวน core<select id="e_core"><option>12</option><option>24</option><option>48</option><option>60</option><option>96</option></select></label>
+      <label>ระยะลากคร่อม (เมตร)<input id="e_len" type="number" min="0" value="150"></label>
+      <label>จำนวนหัวต่อ<input id="e_j" type="number" min="1" value="2"></label>
+      <label>ข้ามถนน (เส้น)<input id="e_rd" type="number" min="0" value="0"></label>
+      <label>เก็บ+ปลอกสาย (นาที/หัว ไม่รวมต่อ core)<input id="e_tidy" type="number" min="0" value="24"></label>
+      <label>ลากสาย (นาที/50 ม. ขึ้นเสา 2 ต้น · ทีม 2 คน)<input id="e_lay" type="number" min="0" value="10"></label>
+      <label>กำลังคน<select id="e_team"><option value="2,1">2 คน (1 ทีม)</option><option value="3,1">3 คน (1 ทีม)</option><option value="4,2">4 คน (ทีม 2+2)</option><option value="5,2">5 คน (ทีม 3+2)</option></select></label>
+    </div>
+    <div class="btns" style="margin:0 0 10px"><button class="p" id="e_auto">⚡ ดึงจากข้อความที่วาง</button></div>
+    <div id="e_out"></div>
+  </div>
+</div>
+<script>
+var SAMPLE = "==== 06/11/2026 ====\n18:59 >> Created Workforce SR P.\n18:59 >> Assigned Ibrohim S.\nเข้าสถานที่ไม่ได้ พื้นที่เฉพาะ / พื้นที่เสี่ยงภัย เช่น Red Zone\n==== 07/11/2026 ====\n05:42 >> Assigned Saiphoo P.\n06:04 >> Assigned Arhamah M.\n06:05 >> Accepted Arhamah M.\n06:13 >> Departed Arhamah M.\n06:26 >> On-Site Arhamah M.\n06:36 >> ขาดระยะ 5.97km จากโคกหมักtoปรีกี\n07:33 >> เจอจุดขาดแล้ว สาเหตุ มดทำรังในหัวต่อ  reuse\n07:50 >> Done Arhamah M.";
+var $ = function(id){return document.getElementById(id)};
+var inp = $("in"), out = $("out");
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function fmt(min){
+  if(min==null||isNaN(min)) return "-";
+  min=Math.round(min); if(min<0) return "-";
+  var h=Math.floor(min/60), m=min%60;
+  if(h>=24){var d=Math.floor(h/24); h=h%24; return d+" วัน "+h+" ชม. "+m+" นาที"}
+  return h? h+" ชม. "+m+" นาที" : m+" นาที";
+}
+var META = {
+  created:{ic:"📝",mood:"😐",c:"#64748b",th:"เปิดงานในระบบ",ex:function(w){return "งานถูกสร้างโดย "+w+" — จุดเริ่มต้นของไทม์ไลน์"}},
+  assigned:{ic:"📌",mood:"🙂",c:"#3b6cf6",th:"มอบหมายงาน",ex:function(w){return "ระบบ/หัวหน้าจ่ายงานให้ "+w+" รอการตอบรับ"}},
+  accepted:{ic:"✅",mood:"😊",c:"#16a34a",th:"ตอบรับงาน",ex:function(w){return w+" ยืนยันว่าจะรับงานนี้"}},
+  departed:{ic:"🚗",mood:"😃",c:"#0ea5e9",th:"ออกเดินทาง",ex:function(w){return w+" ออกเดินทางไปยังหน้างานแล้ว"}},
+  onsite:{ic:"📍",mood:"💪",c:"#8b5cf6",th:"ถึงหน้างาน",ex:function(w){return w+" ถึงหน้างานและเริ่มตรวจสอบ"}},
+  done:{ic:"🏁",mood:"🥳",c:"#16a34a",th:"งานเสร็จสิ้น",ex:function(w){return w+" ปิดงานเรียบร้อย"}},
+  help:{ic:"🆘",mood:"😰",c:"#dc2626",th:"ขอความช่วยเหลือ",ex:function(w){return w+" ขอความช่วยเหลือจากทีม"}},
+  cancel:{ic:"❌",mood:"😕",c:"#dc2626",th:"ยกเลิก/ปฏิเสธงาน",ex:function(w){return w+" ยกเลิกหรือปฏิเสธงาน"}}
+};
+function actKey(a){
+  a=a.toLowerCase().replace(/[^a-z]/g,"");
+  if(a==="onsite") return "onsite";
+  if(/^(created|assigned|accepted|departed|done|help)$/.test(a)) return a;
+  if(/^(cancel|cancelled|canceled|rejected|reject)$/.test(a)) return "cancel";
+  return null;
+}
+function classifyNote(t){
+  var m, r={ic:"💬",mood:"😐",c:"#64748b",th:"บันทึกจากช่าง",ex:"ข้อความบันทึกเพิ่มเติม"};
+  if(/เข้าสถานที่ไม่ได้|red\s*zone|เสี่ยงภัย|พื้นที่เฉพาะ/i.test(t)){
+    r={ic:"🚫",mood:"😟",c:"#dc2626",th:"เข้าพื้นที่ไม่ได้",ex:"ช่างเข้าสถานที่ไม่ได้ เพราะเป็นพื้นที่เฉพาะ/เสี่ยงภัย (เช่น Red Zone) งานจึงรอหรือต้องเปลี่ยนแผน"};
+  } else if((m=t.match(/ขาดระยะ\s*([\d.]+)\s*km\s*(?:จาก)?\s*(.*?)\s*to\s*(.+)/i))){
+    r={ic:"✂️",mood:"😮",c:"#d97706",th:"พบสายขาด · "+m[1]+" กม.",ex:"วัดด้วย OTDR พบว่าเส้นใยขาดที่ระยะ "+m[1]+" กม. อยู่ในช่วงระหว่าง "+m[2]+" ถึง "+m[3]+" ต้องเดินหาจุดขาดจริง"};
+  } else if(/ขาดระยะ/.test(t)){
+    r={ic:"✂️",mood:"😮",c:"#d97706",th:"พบสายขาด",ex:"แจ้งระยะที่สายขาด ใช้ประมาณตำแหน่งที่ต้องไปแก้"};
+  } else if(/เจอจุดขาด|พบจุดขาด|เจอจุด/.test(t)){
+    var cause=(t.match(/สาเหตุ\s*(.+)/)||[])[1]||"";
+    r={ic:"🔍",mood:"😌",c:"#16a34a",th:"เจอจุดขาดแล้ว",ex:"ช่างพบตำแหน่งที่ขาดจริง"+(cause?" สาเหตุ: "+cause:"")+(/มด/.test(cause)?" 🐜 (มดทำรังกัดสาย/หัวต่อ)":"")+(/reuse/i.test(cause)?" — แก้โดยนำหัวต่อมาใช้ซ้ำ (reuse)":"")};
+  }
+  return r;
+}
+var HDR=null;
+function hm(d){return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function dmy(d){return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear()}
+function parseHdr(l){var h={},m;
+  if((m=l.match(/JB\d{2}-\d+/i)))h.job=m[0];
+  if((m=l.match(/\b(Critical|Major|Minor)\b/i)))h.sev=m[1];
+  if((m=l.match(/Service\s+(?:Unaffected|Affected)/i)))h.svc=m[0];
+  if((m=l.match(/([A-Z0-9]+)-\[\d+\]/)))h.site=m[1];
+  if((m=l.match(/SitePriority=(\d+)\(([^)]*)\)/))){h.pri=m[1];h.imp=m[2].split(',').map(function(x){var q=x.match(/(.+)-(\d+)/);return q?q[1].replace(/_/g,' ')+' '+q[2]:x}).join(' · ')}
+  if((m=l.match(/OPTIC LOS-?\d*/i)))h.alarm=m[0];
+  if((m=l.match(/\(([A-Z0-9_]+)\s*:\(LOS\)\s*,\s*([A-Z0-9_]+)\s*:\(LOS\)\)/)))h.ends=[m[1],m[2]];
+  if((m=l.match(/Finish Before\s*(\d{1,2})-(\d{1,2})-(\d{4})\s+(\d{1,2}):(\d{2})/i)))h.dl=new Date(+m[3],+m[2]-1,+m[1],+m[4],+m[5]);
+  if((m=l.match(/\bto\s+([^|]+?)\s+by\s+(.+?)\s+\d{6,}\s*$/i))){h.to=m[1];h.by=m[2]}
+  return h}
+function hdrBlock(t){if(!HDR)return '';var o=[];
+  if(!t&&HDR.job)o.push('📌 '+HDR.job+(HDR.sev?' · '+HDR.sev:'')+(HDR.site?' · '+HDR.site:''));
+  if(t&&HDR.sev)o.push('⚠️ ความรุนแรง: '+HDR.sev);
+  if(HDR.alarm)o.push('🚨 อาการ: '+HDR.alarm);
+  if(HDR.ends)o.push('🔗 ลิงก์: '+HDR.ends[0]+' ↔ '+HDR.ends[1]+' (LOS ทั้งสองฝั่ง)');
+  if(HDR.imp)o.push('🏢 โหนด/ลูกค้าที่เกี่ยวข้อง: '+HDR.imp+' (Site Priority '+HDR.pri+')');
+  if(HDR.svc)o.push(/Unaffected/i.test(HDR.svc)?'🟢 ไม่กระทบบริการ (Service Unaffected)':'🔴 กระทบบริการ (Service Affected)');
+  if(HDR.dl)o.push('⏰ กำหนดเสร็จ: '+dmy(HDR.dl)+' '+hm(HDR.dl)+' น.'+(/critical/i.test(HDR.sev||'')?' (SLA Critical ไม่เกิน 3 ชม.)':''));
+  if(HDR.to)o.push('👤 ผู้รับผิดชอบตามใบงาน: '+HDR.to+(HDR.by?' (สั่งงานโดย '+HDR.by+')':''));
+  return o.length?o.join('\n')+'\n\n':''}
+function parse(text){
+  HDR=null;var lines=text.split(/\r?\n/), date=null, evs=[], last=null, errs=0;
+  lines.forEach(function(raw){
+    var l=raw.trim(); if(!l) return;
+    if(!date&&/JB\d{2}-\d+/i.test(l)){HDR=parseHdr(l);return}
+    var d=l.match(/^=+\s*(\d{1,2})\/(\d{1,2})\/(\d{4})\s*=+$/);
+    if(d){date={d:+d[1],m:+d[2],y:+d[3]}; return}
+    var t=l.match(/^(\d{1,2}):(\d{2})\s*>>\s*(.+)$/);
+    if(t){
+      var rest=t[3].trim(), a=rest.match(/^(Created|Assigned|Accepted|Departed|On-?Site|Done|Help|Cancel\w*|Reject\w*)\b\s*(.*)$/i);
+      var dt=date?new Date(date.y>2400?date.y-543:date.y,date.m-1,date.d,+t[1],+t[2]):null;
+      var e={time:t[1].padStart(2,"0")+":"+t[2],dt:dt,date:date?l2(date):"",extra:[]};
+      var k=a?actKey(a[1]):null;
+      if(k){e.type="act";e.key=k;e.who=a[2].trim()||"(ไม่ระบุชื่อ)";e.raw=a[1]}
+      else{e.type="note";e.text=rest}
+      evs.push(e);last=e;return;
+    }
+    evs.push({type:"note",time:"",dt:null,date:date?l2(date):"",text:l,extra:[]});last=evs[evs.length-1];
+  });
+  var di=-1;evs.forEach(function(e,i){if(e.type==="act"&&e.key==="done")di=i});
+  if(di>-1){var mv=[],keep=[];evs.forEach(function(e,i){if(i>di&&e.type==="note"&&!e.time&&/^\s*(สาเหตุ|แก้ไข|แก้โดย|วิธีแก้)/.test(e.text)){e.date=evs[di].date;mv.push(e)}else keep.push(e)});
+    if(mv.length){var k2=keep.indexOf(evs[di]);keep.splice.apply(keep,[k2,0].concat(mv));evs=keep}}
+  return evs;
+}
+function l2(d){return String(d.d).padStart(2,"0")+"/"+String(d.m).padStart(2,"0")+"/"+d.y}
+function mins(a,b){return(a&&b)?(b-a)/60000:null}
+function render(){
+  var txt=inp.value;
+  if(!txt.trim()){out.innerHTML='<div class="empty">🌱 ยังไม่มีข้อความ<br>วางข้อความ หรือกด “ใส่ข้อความตัวอย่าง”</div>';window._sum="";window._full="";return}
+  var evs=parse(txt);
+  if(!evs.length){out.innerHTML='<div class="empty">🤔 อ่านรูปแบบข้อความไม่ออก</div>';return}
+  var acts=evs.filter(function(e){return e.type==="act"});
+  function first(k){return acts.filter(function(e){return e.key===k})[0]}
+  function lastOf(k){var a=acts.filter(function(e){return e.key===k});return a[a.length-1]}
+  var created=first("created"), doneE=lastOf("done"), acc=lastOf("accepted");
+  var main=(doneE&&doneE.who)||(acc&&acc.who)||null;
+  function mine(k){return acts.filter(function(e){return e.key===k&&e.who===main}).pop()}
+  var asg=mine("assigned")||lastOf("assigned"), dep=mine("departed"), site=mine("onsite");
+  var st=[
+    ["รอจ่ายงาน",created&&first("assigned")?mins(created.dt,first("assigned").dt):null],
+    ["รอตอบรับ",asg&&acc?mins(asg.dt,acc.dt):null],
+    ["เดินทาง",dep&&site?mins(dep.dt,site.dt):null],
+    ["ซ่อมหน้างาน",site&&doneE?mins(site.dt,doneE.dt):null],
+    ["รวมทั้งงาน",created&&doneE?mins(created.dt,doneE.dt):(created&&evs.length?mins(created.dt,evs[evs.length-1].dt):null)]
+  ];
+  var isDone=!!doneE, last=evs[evs.length-1];
+  var html='<div class="status '+(isDone?"done":"prog")+'"><span class="em">'+(isDone?"🥳":"🔧")+'</span><div>'+(isDone?"งานเสร็จสิ้นแล้ว":"งานกำลังดำเนินการ")+(main?'<div style="font-weight:400;font-size:.85rem">ผู้รับผิดชอบหลัก: '+esc(main)+'</div>':'')+'</div></div>';
+  html+='<div class="sum">'+st.map(function(s){return '<div class="stat"><b>'+fmt(s[1])+'</b><span>'+s[0]+'</span></div>'}).join("")+'</div>';
+  // people
+  var pm={}, order=[];
+  acts.forEach(function(e){if(!pm[e.who]){pm[e.who]=[];order.push(e.who)}pm[e.who].push(e)});
+  html+='<h3>👥 ผู้เกี่ยวข้อง</h3><div class="people">'+order.map(function(w){
+    var ks=pm[w].map(function(e){return e.key});
+    var role=ks.indexOf("created")>-1&&ks.length===1?"ผู้เปิดงาน 📝":ks.indexOf("done")>-1?"ปิดงาน 🏆":ks.indexOf("accepted")>-1?"กำลังทำงาน 🛠️":ks.indexOf("assigned")>-1?"ถูกมอบหมาย แต่ไม่ตอบรับ 🔄":"ร่วมงาน";
+    return '<div class="pp"><b>'+esc(w)+'</b><small>'+role+'</small><br><small>'+pm[w].map(function(e){return e.time+" "+META[e.key].th}).join(" → ")+'</small></div>'
+  }).join("")+'</div>';
+  // timeline
+  html+='<h3>🕒 ไทม์ไลน์</h3>';
+  var curDate=null, prev=null, plain=[];
+  evs.forEach(function(e){
+    if(e.date!==curDate){curDate=e.date;html+='<div class="day">📅 '+esc(e.date||"ไม่ระบุวันที่")+'</div>';prev=null}
+    var m,head,expl,tag="";
+    if(e.type==="act"){m=META[e.key];head=m.th+" · "+esc(e.who);expl=m.ex(e.who);tag=esc(e.raw)}
+    else{var c=classifyNote(e.text+" "+e.extra.join(" "));m=c;head=c.th;expl=c.ex;tag="โน้ต"}
+    if(e.type==="act"&&e.key==="assigned"&&e.extra.length){var c2=classifyNote(e.extra.join(" "));if(c2.th!=="บันทึกจากช่าง"){m={ic:m.ic,mood:c2.mood,c:c2.c};expl+=" — แต่ "+c2.ex}}
+    var gap=prev&&e.dt&&prev.dt?mins(prev.dt,e.dt):null;
+    if(gap!=null&&gap>=30) html+='<div class="gap">⏳ ผ่านไป '+fmt(gap)+'</div>';
+    var orig=e.type==="note"?e.text:"";
+    html+='<div class="ev" style="--c:'+m.c+'"><div class="t">'+e.time+'</div><div class="ic">'+m.ic+'</div><div class="bd"><div class="h">'+head+'<span class="tag">'+tag+'</span></div><div class="x">'+esc(expl)+'</div>'+(orig?'<div class="x">“'+esc(orig)+'”</div>':'')+(e.extra.length?'<div class="x">📎 '+esc(e.extra.join(" "))+'</div>':'')+'</div><div class="mood">'+m.mood+'</div></div>';
+    if(e.dt)prev=e;
+  });
+  var parts=buildNarr(evs,st,main,isDone,acts),full="";
+  (function(){
+    var std=buildText(evs,st,main,isDone,acts).split("\n").map(function(x){return x.replace(/^\* /,"")});
+    var i1=-1,i2=-1;std.forEach(function(x,i){if(i1<0&&x.indexOf("💡")===0)i1=i;if(i2<0&&x.indexOf("🔬")===0)i2=i});
+    if(i1<0||i2<0)return;
+    var tl=std.slice(0,i1);while(tl.length&&tl[tl.length-1]==="")tl.pop();
+    var an=std.slice(i2);
+    parts.tlStd=tl;parts.sm=parts.smD=[std[i1]];parts.an=parts.anD=an;parts.tl=tl;
+  })();
+  window._full=full;
+  html+='<h3>📋 ข้อความสำหรับคัดลอก (พร้อมสรุปและวิเคราะห์)</h3><div style="font-size:.8rem;color:var(--mut);margin-bottom:6px">✏️ แก้ข้อความในกล่องได้ก่อนคัดลอก และติ๊กเลือกส่วนที่ต้องการ</div><div class="btns" style="margin:0 0 8px"><label><input type="checkbox" data-k="tl"> 🕒 ไทม์ไลน์</label><label><input type="checkbox" data-k="sm"> 💡 สรุปภาพรวม</label><label><input type="checkbox" data-k="bs"> 📣 สรุปให้หัวหน้า</label><label><input type="checkbox" data-k="an"> 🔬 วิเคราะห์ละเอียด</label></div><textarea id="full" class="full"></textarea><div class="btns"><button class="p" id="cpfull">📋 คัดลอกข้อความทั้งหมด</button></div>';
+  out.innerHTML=html;
+  var fb2=$("full");
+  function refresh(){var t=joinParts(parts);fb2.value=t;window._full=t;fb2.style.height="auto";fb2.style.height=Math.min(1500,fb2.scrollHeight+6)+"px"}
+  Array.prototype.forEach.call(document.querySelectorAll("input[data-k]"),function(c){c.checked=SEL[c.getAttribute("data-k")];c.onchange=function(){SEL[c.getAttribute("data-k")]=c.checked;refresh()}});
+  refresh();
+  $("cpfull").onclick=function(){copyTxt(fb2.value,this,"📋 คัดลอกข้อความทั้งหมด")};
+  window._sum=(isDone?"✅ งานเสร็จสิ้น":"🔧 งานกำลังดำเนินการ")+(main?" | ผู้รับผิดชอบ: "+main:"")+"\n"+st.map(function(s){return s[0]+": "+fmt(s[1])}).join("\n");
+}
+function copyTxt(s,btn,label){
+  function ok(){btn.textContent="✔️ คัดลอกแล้ว"}
+  try{navigator.clipboard.writeText(s).then(ok,function(){fb(s);ok()})}catch(e){fb(s);ok()}
+  setTimeout(function(){btn.textContent=label},1600);
+}
+var LINEIC={created:"📝",assigned:"👤",accepted:"👍",departed:"🚗",onsite:"📍",done:"✅",help:"🆘",cancel:"❌"};
+var SHORT={created:"เปิดใบงานแจ้งปัญหา",assigned:"มอบหมายงานให้ช่าง",accepted:"ช่างกดรับงาน",departed:"ช่างออกเดินทาง",onsite:"ช่างถึงหน้างาน",done:"แก้ไขเรียบร้อย ปิดงานสมบูรณ์! 🛠️🎉",help:"ช่างขอความช่วยเหลือ",cancel:"ยกเลิก/ปฏิเสธงาน"};
+function noteEm(t){
+  if(/เข้าสถานที่ไม่ได้|red\s*zone|เสี่ยงภัย/i.test(t))return "🛑⚠️";
+  if(/ขาดระยะ/.test(t))return "🔴💥";
+  if(/มด/.test(t))return "🐜🏠";
+  if(/เจอจุด|พบจุด/.test(t))return "🎯";
+  return "";
+}
+function buildText(evs,st,main,isDone,acts){
+  var L=[],cur=null,nAsg=0,nAcc=0,dates=[];
+  evs.forEach(function(e){
+    if(e.date!==cur){cur=e.date;if(L.length)L.push("");L.push("📅 "+(e.date||"ไม่ระบุวันที่"));L.push("");if(e.date&&dates.indexOf(e.date)<0)dates.push(e.date)}
+    if(e.type==="act"){
+      var s=SHORT[e.key];
+      if(e.key==="assigned"){nAsg++;s=nAsg===1?"มอบหมายงานให้ช่างคนแรก":"ส่งต่อ/เปลี่ยนช่างเป็น "+e.who}
+      if(e.key==="accepted")nAcc++;
+      L.push("* "+LINEIC[e.key]+" "+e.time+" >> "+e.raw+" "+e.who+" ("+s+")");
+    }else{
+      var c=classifyNote(e.text),lead=c.ic==="✂️"?"📉":c.ic,em=noteEm(e.text);
+      L.push("* "+lead+" "+(e.time?e.time+" >> ":"")+e.text+(em?" "+em:"")+" ("+c.ex+")");
+    }
+  });
+  var notes=evs.filter(function(e){return e.type==="note"}).map(function(e){return e.text});
+  var all=notes.join(" ");
+  var blocked=/เข้าสถานที่ไม่ได้|red\s*zone|เสี่ยงภัย/i.test(all);
+  var distM=all.match(/ขาดระยะ\s*([\d.]+)\s*km\s*(?:จาก)?\s*(.*?)\s*to\s*(\S+)/i);
+  var cause=(all.match(/สาเหตุ\s*(.+)/)||[])[1]||"";
+  var ant=/มด/.test(cause);
+  var sum="เป็นเคสแจ้งแก้ไขปัญหาโครงข่าย/สายสัญญาณ";
+  if(blocked)sum+=" โดยวันแรก ("+(dates[0]||"-")+") เข้าซ่อมไม่ได้เพราะเป็นพื้นที่เสี่ยงภัย (Red Zone)";
+  if(main)sum+=(blocked?" จนกระทั่งวันถัดมา ":" ")+"ช่าง "+main+" รับงานและเดินทางเข้าพื้นที่";
+  if(distM)sum+=" ตรวจวัดพบสัญญาณขาดที่ระยะ "+distM[1]+" กม. ช่วง "+distM[2]+" - "+distM[3];
+  if(cause)sum+=" ตรวจหาจนพบว่าสาเหตุคือ "+cause.trim();
+  sum+=isDone?" และแก้ไขจนเสร็จสิ้นเมื่อ "+(acts.filter(function(a){return a.key==="done"}).pop().time)+" น.":" ขณะนี้งานยังไม่ปิด";
+  L.push("");L.push("💡 สรุปภาพรวมเหตุการณ์: "+sum);
+  L.push("");L.push("🔬 วิเคราะห์ละเอียด:");
+  L.push("* ⏱️ เวลารวมทั้งงาน: "+fmt(st[4][1])+" (รอจ่ายงาน "+fmt(st[0][1])+" | รอตอบรับ "+fmt(st[1][1])+" | เดินทาง "+fmt(st[2][1])+" | ซ่อมหน้างาน "+fmt(st[3][1])+")");
+  if(nAsg>nAcc&&nAcc>0)L.push("* 🔄 มีการจ่ายงาน "+nAsg+" ครั้ง แต่ช่างรับงานจริง "+nAcc+" ราย (เปลี่ยนมือ "+(nAsg-nAcc)+" ครั้ง) ทำให้งานเริ่มช้ากว่าที่ควร");
+  var tm=evs.filter(function(e){return e.dt}),mx=0,mf=null,mt=null,i;
+  for(i=1;i<tm.length;i++){var g=mins(tm[i-1].dt,tm[i].dt);if(g>mx){mx=g;mf=tm[i-1];mt=tm[i]}}
+  if(mf)L.push("* ⏳ ช่วงที่รอนานที่สุด: "+mf.time+" → "+mt.time+" ("+fmt(mx)+")"+(blocked&&mx>=120?" ซึ่งสอดคล้องกับการเข้าพื้นที่ไม่ได้/รอเปลี่ยนช่าง":""));
+  var site=acts.filter(function(a){return a.key==="onsite"}).pop(),fnd=evs.filter(function(e){return e.type==="note"&&/เจอจุด|พบจุด/.test(e.text)})[0],dn=acts.filter(function(a){return a.key==="done"}).pop();
+  if(site&&fnd&&fnd.dt)L.push("* 🔍 ใช้เวลาหาจุดขาด "+fmt(mins(site.dt,fnd.dt))+" หลังถึงหน้างาน"+(dn?" และแก้ไขต่ออีก "+fmt(mins(fnd.dt,dn.dt)):""));
+  if(ant)L.push("* 🐜 ต้นเหตุคือสัตว์/แมลงเข้าทำรังในหัวต่อ แนะนำตรวจซีลและฝาครอบหัวต่อจุดข้างเคียงเพื่อป้องกันซ้ำ");
+  if(/reuse/i.test(cause))L.push("* ♻️ ใช้วิธี reuse หัวต่อเดิม เหมาะกับงานด่วน แต่ควรติดตามผลสัญญาณหลังซ่อมว่าค่า loss ปกติ");
+  if(blocked)L.push("* 🛑 ข้อเสนอแนะ: ก่อนมอบหมายงานในพื้นที่เสี่ยงภัย ควรประสานขอสิทธิ์เข้าพื้นที่หรือเช็กสถานการณ์ก่อน เพื่อลดการเสียเวลา");
+  L.push("* "+(isDone?"🎉 ผลลัพธ์: ปิดงานสำเร็จ":"🔧 สถานะ: ยังดำเนินการอยู่"));
+  return L.join("\n");
+}
+var SEL={tl:true,sm:true,bs:false,an:true,d:true,r:false};
+var MOOD={created:'😐',assigned:'🙂',accepted:'😊',departed:'😃',onsite:'💪',done:'🥳',help:'😰',cancel:'😕'};
+var NM={'🚫':'😟','📉':'😮','🔍':'😌','🔧':'😎','💬':'😐'};
+function joinParts(p){var t=(($("ttl")&&$("ttl").value)||"").trim();if(SEL.r){var jl=t?"📌 "+t:(HDR&&HDR.job?"📌 "+HDR.job+(HDR.sev?" · "+HDR.sev:"")+(HDR.site?" · "+HDR.site:""):"");return (jl?jl+"\n":"")+p.rp.join("\n").replace(/^\n+/,"")}
+var mm=SEL.d?"D":"";var body=["tl","sm","bs","an"].filter(function(k){return SEL[k]&&p[k+(k==="tl"?"":mm)].length}).map(function(k){return p[k+(k==="tl"?"":mm)].join("\n").replace(/^\n+/,"")}).join("\n\n");return (t?"📌 "+t+"\n\n":"")+hdrBlock(t)+body}
+function buildNarr(evs,st,main,isDone,acts){
+  var L=[],cur=null,nAsg=0,nAcc=0,dates=[],T={},accepted={},lastAsg=null,lastSite=null,asgList=[];
+  var BL=/เข้าสถานที่ไม่ได้|red\s*zone|เสี่ยงภัย/i, CUT=/ขาดระยะ\s*([\d.]+)\s*km\s*(?:จาก)?\s*(.*?)\s*to\s*(\S+)/i;
+  evs.forEach(function(e){
+    if(e.date!==cur){cur=e.date;if(L.length)L.push('');L.push('📅 '+(e.date||'ไม่ระบุวันที่'));L.push('');if(e.date&&dates.indexOf(e.date)<0)dates.push(e.date)}
+    var s,em='',lead,w,g,m;
+    if(e.type==='act'){
+      w=e.who;lead=LINEIC[e.key];T[w+'|'+e.key]=e.dt;
+      if(e.key==='created'){s='เปิดใบงานเข้าระบบ';if(!T.__cr)T.__cr=e.dt}
+      else if(e.key==='assigned'){
+        nAsg++;asgList.push(e);
+        if(nAsg===1)s='ช่างคนแรก';
+        else{g=lastAsg&&e.dt&&lastAsg.dt?mins(lastAsg.dt,e.dt):null;
+          s='จ่ายใหม่ครั้งที่ '+nAsg+(g!=null?' ห่างจากครั้งก่อน '+fmt(g):'')+(lastAsg&&!accepted[lastAsg.who]?' · '+lastAsg.who+' ยังไม่มีบันทึกรับงาน':'')}
+        lastAsg=e;
+      }
+      else if(e.key==='accepted'){nAcc++;accepted[w]=1;g=mins(T[w+'|assigned'],e.dt);s=g!=null?'รับงานหลังได้รับมอบหมาย '+fmt(g):'กดรับงาน'}
+      else if(e.key==='departed'){g=mins(T[w+'|accepted'],e.dt);s=g!=null?'ออกเดินทางหลังรับงาน '+fmt(g):'ออกเดินทาง'}
+      else if(e.key==='onsite'){lastSite=e;g=mins(T[w+'|departed'],e.dt);s=g!=null?'ใช้เวลาเดินทาง '+fmt(g):'ถึงหน้างาน'}
+      else if(e.key==='done'){g=mins(T[w+'|onsite'],e.dt);s=g!=null?'ปิดงานหลังอยู่หน้างาน '+fmt(g):'ปิดงานสำเร็จ';em=' 🛠️🎉'}
+      else s=SHORT[e.key];
+      var el=T.__cr&&e.dt&&/accepted|onsite|done/.test(e.key)?mins(T.__cr,e.dt):null;
+      L.push('* '+lead+' '+e.time+' >> '+e.raw+' '+w+em+' ('+s+(el!=null?' · นับจากเปิดงาน '+fmt(el):'')+') '+(MOOD[e.key]||''));
+    }else{
+      var t=e.text;lead='💬';em=noteEm(t);
+      var ref=lastSite&&e.dt?mins(lastSite.dt,e.dt):null;
+      if(BL.test(t)){lead='🚫';s='เข้าปฏิบัติงานไม่ได้ทันทีเพราะเป็นพื้นที่เสี่ยงภัย'}
+      else if((m=t.match(CUT))){lead='📉';s='เส้นใยขาดที่ราว '+m[1]+' กม. ช่วง '+m[2]+' – '+m[3]+(ref!=null?' (หลังถึงหน้างาน '+fmt(ref)+')':'')}
+      else if(/ขาดระยะ/.test(t)){lead='📉';s='แจ้งระยะที่สายขาด'}
+      else if(/เจอจุดขาด|พบจุดขาด|เจอจุด/.test(t)){lead='🔍';var cz=((t.match(/สาเหตุ\s*(.+)/)||[])[1]||'').replace(/\s+/g,' ').trim();
+        s='พบจุดขาดจริง'+(ref!=null?' หลังถึงหน้างาน '+fmt(ref):'')+(/มด/.test(cz)?' · มดทำรังที่หัวต่อ ไม่ใช่สายถูกตัด':(cz?' · สาเหตุ: '+cz:''))+(/reuse/i.test(cz)?' · แก้ด้วย reuse (น่าจะนำอุปกรณ์เดิมมาใช้ซ้ำ)':'')}
+      else if(/^\s*สาเหตุ/.test(t)){lead='🔍';s='สาเหตุที่ช่างบันทึก (อยู่ในช่วง On-Site)'}
+      else if(/^\s*(แก้ไข|แก้โดย|วิธีแก้)/.test(t)){lead='🔧';s='วิธีแก้ไขที่ช่างทำ (อยู่ในช่วง On-Site)'}
+      else s='บันทึกเพิ่มเติม';
+      L.push('* '+lead+' '+(e.time?e.time+' >> ':'')+t+(em?' '+em:'')+' ('+s+') '+(NM[lead]||''));
+    }
+  });
+  var notesAll=evs.filter(function(e){return e.type==='note'});
+  var all=notesAll.map(function(e){return e.text}).join(' ');
+  var blocked=BL.test(all), cm=all.match(CUT);
+  var cause=((all.match(/สาเหตุ\s*(.+)/)||[])[1]||'').replace(/\s+/g,' ').trim();
+  var ant=/มด/.test(cause), reuse=/reuse/i.test(cause);
+  function ev(k,w){return acts.filter(function(a){return a.key===k&&(!w||a.who===w)}).pop()}
+  var cr=acts.filter(function(a){return a.key==='created'})[0], dn=ev('done'), acc=main?ev('accepted',main):null, dep=main?ev('departed',main):null, site=main?ev('onsite',main):null;
+  var fnd=notesAll.filter(function(e){return /เจอจุดขาด|พบจุดขาด|เจอจุด/.test(e.text)})[0];
+  var total=st[4][1];
+  var p=[],fa=asgList[0],g2;
+  if(cr)p.push('ใบงานนี้ถูกเปิดโดย '+cr.who+' เมื่อ '+cr.time+' น. ของวันที่ '+cr.date);
+  if(fa){g2=cr&&cr.dt&&fa.dt?mins(cr.dt,fa.dt):null;p.push(g2!=null&&g2<=5?'และถูกจ่ายให้ '+fa.who+' แทบจะทันที':'จากนั้นจ่ายงานให้ '+fa.who+(g2!=null?' ในอีก '+fmt(g2):''))}
+  if(blocked)p.push('แต่ข้อความบันทึกว่าเข้าสถานที่ไม่ได้เพราะเป็นพื้นที่เสี่ยงภัย (Red Zone) งานจึงสะดุดตั้งแต่ก้าวแรก'+(cr&&dn&&cr.date!==dn.date?' และค้างข้ามคืนไปอีกวัน':''));
+  if(asgList.length>1)p.push('ต่อมามีการจ่ายงานใหม่ให้ '+asgList.slice(1).map(function(x){return x.who+' ('+x.time+' น.)'}).join(' แล้วเปลี่ยนเป็น '));
+  if(main&&acc)p.push('คนที่รับงานจริงคือ '+main+' โดยกดรับตอน '+acc.time+(dep?' ออกเดินทางตอน '+dep.time:'')+(site?' และถึงหน้างานตอน '+site.time:'')+' น.');
+  if(cm)p.push('เมื่อวัดแล้วพบสายขาดที่ราว '+cm[1]+' กม. ในช่วง '+cm[2]+' ถึง '+cm[3]);
+  if(fnd)p.push('ก่อนจะเจอจุดขาดจริงตอน '+fnd.time+' น.'+(cause?' สาเหตุคือ '+cause:''));
+  p.push(dn?'และปิดงานได้ตอน '+dn.time+' น. รวมใช้เวลา '+fmt(total)+' นับจากเปิดใบงาน':'ขณะนี้ยังไม่พบบันทึกการปิดงาน');
+  var q=[],ov=cr&&dn&&cr.date!==dn.date,pre0=cr&&site?mins(cr.dt,site.dt):null,wk0=site&&dn?mins(site.dt,dn.dt):null;
+  if(cr){var q1='เรื่องเริ่มต้นเมื่อ '+cr.time+' น. ของวันที่ '+cr.date+' เมื่อ '+cr.who+' เปิดใบงานแจ้งปัญหาเข้าระบบ';
+    if(fa){var gg=cr.dt&&fa.dt?mins(cr.dt,fa.dt):null;q1+=' และงานถูกจ่ายให้ช่าง '+fa.who+(gg!=null&&gg<=5?' แทบจะในทันที':(gg!=null?' ในอีก '+fmt(gg):''))}
+    q.push('🎬 '+q1)}
+  if(blocked){var q2='แต่เรื่องไม่ได้ราบรื่นตั้งแต่ต้น เพราะมีบันทึกว่าเข้าสถานที่ไม่ได้ เนื่องจากเป็นพื้นที่เฉพาะหรือพื้นที่เสี่ยงภัย (เช่น Red Zone) ช่างจึงยังเข้าไปแก้ปัญหาไม่ได้ ใบงานจึงค้างอยู่ตรงนี้'+(ov?' และเลยข้ามคืนไปถึงเช้าวันถัดมา':'');
+    if(asgList.length>1)q2+=' พอถึงช่วงเช้ามีการจ่ายงานใหม่ให้ '+asgList.slice(1).map(function(x){return x.who+' ('+x.time+' น.)'}).join(' แล้วเปลี่ยนไปเป็น ')+(nAsg>nAcc&&main?' และคนที่กดรับงานจริงคือ '+main:'');
+    q.push('🚧 '+q2)}
+  else if(asgList.length>1)q.push('🔄 ต่อมางานถูกจ่ายใหม่ให้ '+asgList.slice(1).map(function(x){return x.who+' ('+x.time+' น.)'}).join(' แล้วเปลี่ยนไปเป็น ')+(nAsg>nAcc&&main?' และคนที่กดรับงานจริงคือ '+main:''));
+  if(main&&acc)q.push('🚗 '+main+' กดรับงานเมื่อ '+acc.time+' น.'+(dep?' ก่อนออกเดินทางตอน '+dep.time+' น.':'')+(site?' และถึงหน้างานตอน '+site.time+' น.'+(dep?' (ใช้เวลาเดินทาง '+fmt(mins(dep.dt,site.dt))+')':''):''));
+  var q4='';
+  if(cm)q4+='เมื่อตรวจวัดสัญญาณ พบว่าสายขาดที่ระยะประมาณ '+cm[1]+' กม. ระหว่าง '+cm[2]+' กับ '+cm[3]+' ซึ่งเป็นเพียงตำแหน่งโดยประมาณ ช่างจึงต้องไล่ตรวจตามแนวสายเพื่อหาจุดขาดจริง';
+  if(fnd){q4+=(q4?' จนพบจุดขาดจริงตอน ':'ช่างพบจุดขาดจริงตอน ')+fnd.time+' น.'+(site&&fnd.dt?' (หลังถึงหน้างานราว '+fmt(mins(site.dt,fnd.dt))+')':'');
+    if(ant)q4+=' ต้นเหตุไม่ใช่สายถูกตัดหรือถูกกระแทก แต่เป็นมดเข้าไปทำรังในหัวต่อ จนกระทบการเชื่อมต่อของสัญญาณ';else if(cause)q4+=' สาเหตุที่บันทึกไว้คือ '+cause;
+    if(reuse)q4+=' และช่างแก้ไขแบบ reuse ซึ่งน่าจะหมายถึงการนำหัวต่อหรืออุปกรณ์เดิมกลับมาใช้ซ้ำ'}
+  if(q4)q.push('🔎 '+q4);
+  q.push(dn?'🏁 ในที่สุด '+(main||dn.who)+' ปิดงานได้ตอน '+dn.time+' น. รวมเวลาตั้งแต่เปิดใบงานจนปิดงาน '+fmt(total)+(pre0!=null&&wk0!=null&&pre0>wk0?' โดยเวลาส่วนใหญ่หมดไปกับช่วงก่อนช่างถึงหน้างาน ('+fmt(pre0)+') ส่วนการซ่อมจริงใช้เวลาเพียง '+fmt(wk0):''):'⏳ ขณะนี้ยังไม่พบบันทึกการปิดงาน งานจึงยังอยู่ระหว่างดำเนินการ');
+  var sx=[];
+  if(cr)sx.push(cr.who+' เปิดใบงานเมื่อ '+cr.time+' น. ('+cr.date+')'+(fa?' และจ่ายงานให้ '+fa.who:'')+'');
+  if(blocked)sx.push('แต่เข้าพื้นที่ไม่ได้เพราะเป็นพื้นที่เสี่ยงภัย (Red Zone) งานจึงค้าง'+(ov?'ข้ามคืน':''));
+  if(asgList.length>1&&main)sx.push('ต่อมามีการเปลี่ยนช่าง จน '+main+' เป็นผู้รับงาน');
+  if(main&&site)sx.push(main+' ถึงหน้างานตอน '+site.time+' น.');
+  if(cm)sx.push('วัดพบสายขาดราว '+cm[1]+' กม. ช่วง '+cm[2]+'–'+cm[3]);
+  if(fnd)sx.push((cm?'จนเจอ':'เจอ')+'จุดขาดจริงตอน '+fnd.time+' น.'+(ant?' สาเหตุคือมดทำรังในหัวต่อ ไม่ใช่สายถูกตัด':(cause?' สาเหตุ: '+cause:''))+(reuse?' แก้ด้วย reuse':''));
+  sx.push(dn?'และปิดงานตอน '+dn.time+' น. รวมใช้เวลา '+fmt(total):'ขณะนี้งานยังไม่ปิด');
+  var tlEnd=L.length;var ss=[];
+  if(cr)ss.push('มีการเปิดใบงานแจ้งปัญหาเมื่อ '+cr.time+' น. ของวันที่ '+cr.date+(fa?' และจ่ายให้ช่าง '+fa.who:''));
+  else if(fa)ss.push('งานถูกจ่ายให้ช่าง '+fa.who);
+  if(blocked)ss.push('แต่เข้าพื้นที่ไม่ได้ เพราะเป็นพื้นที่เสี่ยงภัย (Red Zone) งานจึงค้าง'+(ov?'ข้ามคืน':'อยู่'));
+  if(asgList.length>1&&main)ss.push((ov?'เช้าวันถัดมา':'ต่อมา')+'มีการเปลี่ยนช่าง และ '+main+' เป็นคนรับงานไปแก้'+(site?' ถึงหน้างานตอน '+site.time+' น.':''));
+  else if(main&&site)ss.push(main+' รับงานและถึงหน้างานตอน '+site.time+' น.');
+  if(cm)ss.push('ผลวัดสัญญาณบอกว่าสายขาดห่างไปราว '+cm[1]+' กม. (ช่วง '+cm[2]+'–'+cm[3]+') ช่างจึงไล่ตรวจตามแนวสาย');
+  if(fnd)ss.push('สุดท้ายเจอจุดขาดตอน '+fnd.time+' น.'+(ant?' ต้นเหตุคือมดเข้าไปทำรังในหัวต่อสาย ทำให้สัญญาณใช้ไม่ได้ ไม่ได้เกิดจากสายถูกตัด':(cause?' สาเหตุ: '+cause:''))+(reuse?' ช่างแก้โดยใช้ reuse (น่าจะนำอุปกรณ์เดิมมาใช้ซ้ำ)':''));
+  ss.push(dn?'งานปิดตอน '+dn.time+' น. รวมใช้เวลา '+fmt(total)+(pre0!=null&&wk0!=null&&pre0>wk0?' ส่วนใหญ่หมดไปกับช่วงรอก่อนช่างถึงหน้างาน':''):'ตอนนี้งานยังไม่ปิด');
+  L.push('');L.push('💡 สรุปเหตุการณ์ (เล่าสั้นๆ):');ss.forEach(function(x){L.push(x)});
+  var A=[],pre=cr&&site?mins(cr.dt,site.dt):null,work=site&&dn?mins(site.dt,dn.dt):null;
+  if(pre!=null&&work!=null&&total>0){var pp=Math.round(pre/total*100);A.push('* ⏱️ เวลาไปอยู่ตรงไหน: '+pp+'% ของเวลาทั้งหมด ('+fmt(pre)+') ผ่านไปก่อนที่ช่างจะถึงหน้างาน ส่วนการซ่อมจริงใช้ '+(100-pp)+'% ('+fmt(work)+')'+(pp>=60?' — แปลว่าคอขวดอยู่ที่การเข้าถึงพื้นที่และการจัดคน ไม่ใช่ความยากของงานซ่อม':''))}
+  if(nAsg>nAcc&&nAcc>0)A.push('* 🔄 การเปลี่ยนมือ: จ่ายงาน '+nAsg+' ครั้ง แต่ช่างรับจริง '+nAcc+' คน ('+(nAsg-nAcc)+' ครั้งไม่มีบันทึกรับงาน) สาเหตุยังไม่ชัด ควรถามหัวหน้าเวร');
+  if(blocked)A.push('* 🛑 พื้นที่เสี่ยงภัย: เป็นข้อจำกัดนอกการควบคุมของช่าง ควรแยกเวลารอเข้าพื้นที่ออกจากเวลาซ่อมเมื่อรายงาน SLA');
+  if(site&&fnd&&fnd.dt)A.push('* 🔍 การหาจุดขาด: ใช้เวลา '+fmt(mins(site.dt,fnd.dt))+' หลังถึงหน้างานจึงเจอจุดขาด'+(cm?' ระยะ '+cm[1]+' กม. เป็นค่าประมาณ ช่างจึงต้องตรวจตามแนวสาย':'')+(dn?' และหลังเจอแล้วใช้อีก '+fmt(mins(fnd.dt,dn.dt))+' ในการแก้ไขและปิดงาน':''));
+  if(ant)A.push('* 🐜 สาเหตุต้นทาง: มดทำรังในหัวต่อ แสดงว่าจุดต่อมีช่องให้แมลงเข้าได้ (ฝาปิดไม่สนิท ซีลเสื่อม หรือมีรอยรั่ว) จุดนี้และกล่องต่อข้างเคียงจึงมีโอกาสเจอปัญหาซ้ำ'+(reuse?' และเมื่อใช้หัวต่อเดิมซ้ำ ควรติดตามค่า loss หลังซ่อมอีก 1-2 วัน':''));
+  var I=[];
+  if(blocked)I.push('ติดแท็ก Red Zone ตั้งแต่ตอนเปิดใบงาน และประสานขอสิทธิ์เข้าพื้นที่ก่อนจ่ายงาน จะได้ไม่เสียเวลาช่างไปเปล่า');
+  if(nAsg>nAcc&&nAcc>0)I.push('ตั้งเวลาเตือนเมื่อจ่ายงานแล้วไม่มีการกดรับเกินช่วงที่กำหนด (เช่น 15 นาที) แล้วจ่ายต่อให้คนถัดไปทันที');
+  if(ant)I.push('ถ่ายรูปก่อน-หลังซ่อม และเพิ่มขั้นตอนอุดช่องกันแมลงที่กล่องหัวต่อทุกครั้ง เพื่อลดงานซ้ำจากสาเหตุเดิม');
+  if(I.length){A.push('* 💡 ข้อเสนอเชิงปฏิบัติ:');I.forEach(function(x){A.push('   - '+x)})}
+  A.push('* 📝 หมายเหตุ: วิเคราะห์จากข้อความที่ให้มาเท่านั้น ส่วนที่เป็นการคาดการณ์ได้ระบุคำว่า อาจ/น่าจะ ไว้แล้ว ควรยืนยันกับช่างหรือหัวหน้าเวรก่อนนำไปสรุปทางการ');
+  var smEnd=L.length;var Ad=A;A=[];
+  if(pre!=null&&work!=null&&total>0){var pp2=Math.round(pre/total*100);A.push('⏱️ '+(pp2>=50?'เวลาส่วนใหญ่ ('+pp2+'%) หมดไปกับการรอก่อนช่างถึงหน้างาน':'ช่วงรอก่อนช่างถึงหน้างานใช้ '+pp2+'% ของเวลาทั้งหมด')+' ส่วนซ่อมจริงใช้ '+fmt(work))}
+  if(blocked)A.push('🛑 ความล่าช้าส่วนหนึ่งมาจากเข้าพื้นที่เสี่ยงภัยไม่ได้ ไม่ใช่จากการซ่อม');
+  if(nAsg>nAcc&&nAcc>0)A.push('🔄 จ่ายงาน '+nAsg+' ครั้ง แต่มีคนรับจริง '+nAcc+' คน ควรถามหัวหน้าเวรว่าทำไมไม่รับ');
+  if(site&&fnd&&fnd.dt)A.push('🔍 หาจุดขาดใช้เวลา '+fmt(mins(site.dt,fnd.dt))+' หลังถึงหน้างาน');
+  if(ant)A.push('🐜 มดทำรังในหัวต่อ อาจเกิดซ้ำได้ ควรปิดซีลหัวต่อให้แน่น');
+  A.push('ℹ️ วิเคราะห์จากข้อความที่ให้เท่านั้น ควรยืนยันกับช่างก่อนใช้จริง');
+  L.push('');L.push('🔬 วิเคราะห์แบบสั้นๆ:');
+  var os=[],czr='',fxr='',czE=null,cmE=notesAll.filter(function(e){return CUT.test(e.text)})[0];
+  notesAll.forEach(function(e){var m1=e.text.match(/สาเหตุ\s*:?\s*(.+)/);
+    if(m1){czE=e;var fm=m1[1].match(/^(.*?)\s*(?:แก้ไข|แก้โดย|วิธีแก้|ดำเนินการแก้)\s*:?\s*(.+)$/);if(fm){czr=fm[1];fxr=fm[2]}else czr=m1[1]}
+    else{var m2=e.text.match(/(?:แก้ไข|แก้โดย|วิธีแก้)\s*:?\s*(.+)/);if(m2)fxr=m2[1]}});
+  var rm=czr.match(/^(.*?)\s*reuse\s*$/i);if(rm){czr=rm[1];fxr=(fxr?fxr+' ':'')+'reuse (น่าจะหมายถึงนำหัวต่อ/อุปกรณ์เดิมกลับมาใช้ซ้ำ)'}
+  czr=czr.replace(/\s+/g,' ').trim();fxr=fxr.replace(/\s+/g,' ').trim();
+  if(site&&(czr||fxr)){
+    var inW=(!czE||!czE.dt)?true:!!(site.dt&&czE.dt>=site.dt&&(!dn||czE.dt<=dn.dt));
+    os.push('','🛠️ สาเหตุและการแก้ไข'+(inW?' (อยู่ในช่วง On-Site '+site.time+(dn?' – '+dn.time:'')+' น.'+(dn?' รวม '+fmt(mins(site.dt,dn.dt)):'')+')':''));
+    if(cmE&&cm)os.push('📉 ตรวจพบ: สายขาดราว '+cm[1]+' กม. ช่วง '+cm[2]+'–'+cm[3]+(cmE.time?' ('+cmE.time+' น.)':''));
+    if(czr)os.push('🔍 สาเหตุ: '+czr+(czE&&czE.time?' (พบตอน '+czE.time+' น.)':''));
+    if(fxr)os.push('🔧 วิธีแก้ไข: '+fxr+(dn?' → ปิดงานตอน '+dn.time+' น.':''));
+    var am=fxr.match(/arss\s*(\d+)\s*m\s*(\d+)\s*c/i),tm2=fxr.match(/ตัดต่อ\s*(\d+)\s*หัวต่อ(\s*ถาวร)?/);
+    if(am||tm2)os.push('📐 สรุปงานแก้: '+(am?'สาย ARSS '+am[1]+' เมตร '+am[2]+' คอร์':'')+(am&&tm2?' · ':'')+(tm2?'ตัดต่อ '+tm2[1]+' หัวต่อ'+(tm2[2]?' (ถาวร)':''):''));
+    if(inW)os.push('👉 ทั้งการหาสาเหตุและการแก้ไขทำในช่วง On-Site (ตั้งแต่ถึงหน้างานจนปิดงาน)');
+  }
+  var sevK=(HDR&&HDR.sev||'').toLowerCase(),LIM={critical:180}[sevK];
+  if(LIM&&cr&&cr.dt&&dn&&dn.dt){
+    var used=mins(cr.dt,dn.dt),dl2=new Date(cr.dt.getTime()+LIM*60000),left=LIM-used,pc=Math.round(used/LIM*100);
+    var dlTxt=hm(dl2)+' น.'+(HDR&&HDR.dl&&Math.abs(HDR.dl-dl2)>60000?' (ใบงานระบุ '+hm(HDR.dl)+' น.)':'');
+    var sl2=left>=0?'⏰ SLA Critical (ไม่เกิน 3 ชม.): ใช้เวลา '+fmt(used)+' ('+pc+'% ของ SLA) ปิดก่อนกำหนด '+fmt(left)+' ✅ กำหนด '+dlTxt+(left<30?' เฉียดฉิว ควรเร่งตั้งแต่ช่วงจ่ายงาน':''):'⏰ SLA Critical (ไม่เกิน 3 ชม.): ใช้เวลา '+fmt(used)+' เกินกำหนด '+fmt(-left)+' ❌ กำหนด '+dlTxt;
+    A.unshift(sl2);Ad.unshift('* '+sl2)}
+  if(0&&HDR&&HDR.dl&&dn&&dn.dt){var df=mins(dn.dt,HDR.dl);var sl=df>=0?'⏰ SLA'+(HDR.sev?' ('+HDR.sev+')':'')+': ปิดงานก่อนกำหนด '+fmt(df)+' ✅ (กำหนด '+hm(HDR.dl)+' น.)'+(df<30?' เฉียดฉิว ควรเร่งตั้งแต่ช่วงจ่ายงาน':''):'⏰ SLA'+(HDR.sev?' ('+HDR.sev+')':'')+': เกินกำหนด '+fmt(-df)+' ❌ (กำหนด '+hm(HDR.dl)+' น.)';A.unshift(sl);Ad.unshift('* '+sl)}
+  if(/ต้นไม้/.test(czr)){var tr='🌳 สาเหตุจากต้นไม้ แนวสายบริเวณนี้อาจเสี่ยงซ้ำตอนฝนตกหรือลมแรง ควรพิจารณาตัดแต่งต้นไม้ข้างแนวสาย';A.splice(Math.max(A.length-1,0),0,tr);Ad.splice(Math.max(Ad.length-1,0),0,'* '+tr)}
+  var bossL=['','📣 สรุปสำหรับหัวหน้า:'],bs=[];
+  bs.push((isDone?'✅ ปิดงานเรียบร้อย':'🔧 งานยังไม่ปิด')+(HDR&&HDR.job?' · '+HDR.job:'')+(HDR&&HDR.sev?' · '+HDR.sev:'')+' '+(isDone?'🥳':'😟'));
+  if(typeof left==='number')bs.push('⏱️ '+(left>=0?'ทันตาม SLA (เหลือ '+fmt(left)+')':'เกิน SLA '+fmt(-left))+' · ใช้เวลารวม '+fmt(used));
+  else if(total!=null&&!isNaN(total))bs.push('⏱️ ใช้เวลารวม '+fmt(total));
+  if(czr)bs.push('🔍 สาเหตุ: '+czr);
+  if(fxr)bs.push('🔧 วิธีแก้: '+fxr);
+  if(blocked)bs.push('🚫 อุปสรรค: เข้าพื้นที่เสี่ยงภัยไม่ได้ในช่วงแรก');
+  if(nAsg>nAcc&&nAcc>0)bs.push('⚠️ ข้อสังเกต: จ่ายงาน '+nAsg+' ครั้ง รับจริง '+nAcc+' คน');
+  if(typeof left==='number'&&left>=0&&left<30)bs.push('🚨 ปิดงานเฉียดเส้น SLA ควรเร่งตั้งแต่ช่วงจ่ายงาน');
+  bossL=bossL.concat(bs);
+  var ix=Ad.indexOf('* 💡 ข้อเสนอเชิงปฏิบัติ:');if(ix>-1){var cnt=1;while(Ad[ix+cnt]&&/^   - /.test(Ad[ix+cnt]))cnt++;Ad.splice(ix,cnt)}
+  var pv=['🛡️ แนวทางป้องกันไม่ให้เกิดซ้ำ:'];
+  if(/ต้นไม้/.test(czr))pv.push('   - แจ้งเจ้าของพื้นที่หรือฝ่ายที่เกี่ยวข้องให้ตัดแต่งต้นไม้ที่ขึ้นชิดแนวสายจุดนี้','   - บันทึกจุดนี้เป็นพื้นที่เสี่ยง และสำรวจแนวสายซ้ำหลังฝนตกหรือลมแรง');
+  if(ant)pv.push('   - ตรวจและอุดซีลหัวต่อ ใส่ตัวกันแมลง และตรวจกล่องข้างเคียง');
+  if(fxr&&/arss|ตัดต่อ/i.test(fxr))pv.push('   - สำรองสาย ARSS และชุดตัดต่อหัวต่อถาวรไว้กับทีมใกล้พื้นที่ เพื่อลดเวลาเตรียมของ');
+  if(blocked)pv.push('   - ติดแท็ก Red Zone ตั้งแต่เปิดใบงาน และประสานขอสิทธิ์เข้าพื้นที่ก่อนจ่ายงาน');
+  if(nAsg>nAcc&&nAcc>0)pv.push('   - ตั้งเตือนเมื่อจ่ายงานแล้วไม่มีคนรับเกิน 10–15 นาที แล้วจ่ายต่อทันที');
+  if(LIM)pv.push('   - ตั้งเตือน SLA Critical ที่ 60% (ผ่านไป '+fmt(LIM*0.6)+') และ 80% ('+fmt(LIM*0.8)+') ให้หัวหน้าเวรติดตาม');
+  if(!czr)pv.push('   - ให้ช่างระบุสาเหตุและวิธีแก้ไขทุกใบงาน เพื่อวิเคราะห์ย้อนหลังได้');
+  if(pv.length>1)Array.prototype.splice.apply(Ad,[Math.max(Ad.length-1,0),0].concat(pv));
+  var rp=[];
+  var whereTxt=HDR&&HDR.ends?HDR.ends[0]+' ↔ '+HDR.ends[1]:(cm?cm[2]+'–'+cm[3]:'');
+  var whatTxt=(HDR&&HDR.alarm?HDR.alarm+' ':'')+(HDR&&HDR.ends?'ลิงก์ '+whereTxt+' (LOS ทั้งสองฝั่ง)':(cm?'สายขาดราว '+cm[1]+' กม. ช่วง '+whereTxt:'แจ้งปัญหาตามใบงาน'));
+  var when0=cr?cr.date+' '+cr.time+' น.':'',whenEnd=dn?dn.date+' '+dn.time+' น.':'';
+  var svcTxt=HDR&&HDR.svc?(/Unaffected/i.test(HDR.svc)?'ไม่กระทบบริการ':'กระทบบริการ'):'';
+  var imp=[];
+  if(svcTxt)imp.push((/Unaffected/i.test(HDR.svc)?'🟢':'🔴')+' ลูกค้า/บริการ: '+svcTxt+' ('+HDR.svc+')');
+  if(HDR&&HDR.imp)imp.push('🏢 โหนด/ลูกค้าที่เกี่ยวข้อง: '+HDR.imp+' (Site Priority '+HDR.pri+')');
+  if(HDR&&HDR.ends)imp.push('📡 ระบบ: สัญญาณ LOS ทั้งสองฝั่งของลิงก์ '+whereTxt+(HDR.alarm?' ('+HDR.alarm+')':''));
+  else if(cm)imp.push('📡 ระบบ: สัญญาณขาดที่ราว '+cm[1]+' กม. ช่วง '+whereTxt);
+  if(blocked)imp.push('🚧 พื้นที่: เข้าปฏิบัติงานไม่ได้ในช่วงแรก (พื้นที่เสี่ยงภัย)');
+  if(typeof left==='number')imp.push('⏱️ SLA'+(HDR&&HDR.sev?' '+HDR.sev:'')+': '+(left>=0?'ทันกำหนด ✅ (ใช้ '+fmt(used)+' เหลือ '+fmt(left)+')':'เกินกำหนด ❌ (ใช้ '+fmt(used)+' เกิน '+fmt(-left)+')'));
+  else if(total!=null&&!isNaN(total))imp.push('⏱️ ระยะเวลาแก้ไขรวม '+fmt(total));
+  if(!imp.length)imp.push('ไม่มีข้อมูลผลกระทบในข้อความ (ระบุเพิ่มได้)');
+  var rc=['🔎 สาเหตุหลัก: '+(czr||'ยังไม่มีบันทึกสาเหตุ')+(czE&&czE.time?' (พบตอน '+czE.time+' น.)':'')],fac=[];
+  if(/ต้นไม้/.test(czr))fac.push('ต้นไม้บริเวณแนวสาย (ตามที่ช่างบันทึก)');
+  if(ant)fac.push('หัวต่อมีช่องให้แมลงเข้า');
+  if(blocked)fac.push('พื้นที่เสี่ยงภัย เข้าปฏิบัติงานไม่ได้ทันที');
+  if(nAsg>nAcc&&nAcc>0)fac.push('จ่ายงานซ้ำก่อนมีผู้รับ');
+  if(fac.length)rc.push('🧩 ปัจจัยที่เกี่ยวข้อง: '+fac.join(' · '));
+  rc.push('ℹ️ วิเคราะห์ที่ตัวสาเหตุและขั้นตอนงาน ไม่ได้หาผู้ผิด');
+  var ac=[];
+  if(site)ac.push('🚗 ช่าง '+(main||'-')+' ถึงหน้างาน '+site.time+' น.'+(dep?' (ออกเดินทาง '+dep.time+' น.)':''));
+  if(cmE&&cm)ac.push('📉 ตรวจพบสายขาดราว '+cm[1]+' กม. ช่วง '+cm[2]+'–'+cm[3]+(cmE.time?' ('+cmE.time+' น.)':''));
+  if(fxr)ac.push('🔧 วิธีแก้ไข: '+fxr);
+  if(am||tm2)ac.push('📐 สรุปงาน: '+(am?'สาย ARSS '+am[1]+' เมตร '+am[2]+' คอร์':'')+(am&&tm2?' · ':'')+(tm2?'ตัดต่อ '+tm2[1]+' หัวต่อ'+(tm2[2]?' (ถาวร)':''):''));
+  if(site&&inW&&(czr||fxr))ac.push('📍 การหาสาเหตุและแก้ไขทำในช่วง On-Site '+site.time+(dn?' – '+dn.time:'')+' น.'+(dn?' (รวม '+fmt(mins(site.dt,dn.dt))+')':''));
+  ac.push(dn?'✅ ผล: ปิดงานเรียบร้อยตอน '+dn.time+' น. 🥳':'⏳ ผล: งานยังไม่ปิด');
+  var dl3=[],stg=[],gapAD=acc&&dep?mins(acc.dt,dep.dt):null;
+  [0,1,2,3].forEach(function(i){if(st[i][1]!=null&&!isNaN(st[i][1]))stg.push([st[i][0],st[i][1]])});
+  if(gapAD!=null&&gapAD>=0)stg.push(['ช่วงรับงานถึงออกเดินทาง',gapAD]);
+  stg.sort(function(a,b){return b[1]-a[1]});
+  if(stg.length)dl3.push('⏳ จุดที่ใช้เวลามากที่สุด: '+stg[0][0]+' '+fmt(stg[0][1])+(total>0?' ('+Math.round(stg[0][1]/total*100)+'% ของเวลารวม)':'')+(stg[1]&&stg[1][1]>=30?' · รองลงมา: '+stg[1][0]+' '+fmt(stg[1][1]):''));
+  if(nAsg>nAcc&&nAcc>0&&acc&&asgList[0]&&asgList[0].dt)dl3.push('⏳ จ่ายงานครั้งแรก '+asgList[0].time+' น. แต่มีผู้รับงานตอน '+acc.time+' น. ('+fmt(mins(asgList[0].dt,acc.dt))+') มีการจ่ายซ้ำ');
+  if(gapAD!=null&&gapAD>=30)dl3.push('❓ ช่วงรับงานถึงออกเดินทางใช้ '+fmt(gapAD)+' (อาจเป็นการเตรียมอุปกรณ์/วัสดุ ควรยืนยันกับช่าง)');
+  var pvx=pv.slice(1);
+  if(gapAD!=null&&gapAD>=30)pvx.push('   - จัดชุดวัสดุสำรองประจำรถช่าง และตรวจสาเหตุที่ใช้เวลา '+fmt(gapAD)+' ระหว่างรับงานถึงออกเดินทาง');
+  var pr=[];pvx.forEach(function(x,i){pr.push((i+1)+'. '+x.replace(/^\s*-\s*/,'')+'\n    👤 ผู้รับผิดชอบ: ________   📅 กำหนดเสร็จ: ________')});
+  if(!pr.length)pr.push('1. (ระบุแนวทางป้องกัน)\n    👤 ผู้รับผิดชอบ: ________   📅 กำหนดเสร็จ: ________');
+  var one='📌 สรุป 1 บรรทัด: '+whatTxt+(when0?' · เกิดเมื่อ '+when0:'')+' · '+(fxr?'ทำแล้ว: '+fxr:(dn?'ปิดงานแล้ว':'อยู่ระหว่างดำเนินการ'))+' · สาเหตุ: '+(czr||'ยังไม่ระบุ')+' · ผลกระทบ: '+(svcTxt||'ไม่ระบุ')+(typeof left==='number'?' ('+(left>=0?'ทัน SLA':'เกิน SLA')+')':'')+' · ป้องกัน: '+(pvx.length?pvx[0].replace(/^\s*-\s*/,''):'ระบุเพิ่มเติม');
+  rp=['📋 รายงานสรุปเหตุการณ์','',one,'',
+   '1️⃣ เหตุการณ์ (What happened)',
+   '• เกิดอะไรขึ้น: '+whatTxt,
+   '• ที่ไหน: '+((HDR&&HDR.site?'สถานี '+HDR.site:'')+(HDR&&HDR.site&&whereTxt?' · ':'')+whereTxt||'-'),
+   '• เมื่อไหร่: เปิดใบงาน '+(when0||'-')+(dn?' → ปิดงาน '+whenEnd:'')+(HDR&&HDR.sev?' · ความรุนแรง '+HDR.sev:''),
+   '','2️⃣ ลำดับเหตุการณ์ (Timeline)'].concat(L.slice(0,tlEnd)).concat(dl3).concat(['','3️⃣ สาเหตุ (Root Cause)'],rc,['','4️⃣ ผลกระทบ (Impact)'],imp,['','5️⃣ การแก้ไข (Action Taken)'],ac,['','6️⃣ แนวทางป้องกัน (Prevention)'],pr,['','📝 หมายเหตุ: ข้อมูลจากข้อความในใบงาน แนวทางป้องกันเป็นข้อเสนอ ควรใส่ผู้รับผิดชอบและกำหนดเวลาก่อนส่ง']);
+  function cl(x){return x.replace(/^\s*-\s*/,'')}
+  var tlT=[],cd=null,nA=0;
+  evs.forEach(function(e){
+    if(e.date!==cd){cd=e.date;tlT.push('📅 '+(e.date||'ไม่ระบุวันที่'))}
+    var tm=e.time||'ช่วง On-Site',tx,md='';
+    if(e.type==='act'){var w=e.who;md=MOOD[e.key]||'';
+      if(e.key==='created')tx='ตรวจพบเหตุการณ์ / เปิดใบงานในระบบ';
+      else if(e.key==='assigned'){nA++;tx=(nA===1?'ประสานงาน: มอบหมายงานให้ ':'ส่งต่อ/เปลี่ยนผู้รับงานเป็น ')+w}
+      else if(e.key==='accepted')tx=w+' รับงาน';
+      else if(e.key==='departed')tx=w+' ออกเดินทางไปหน้างาน';
+      else if(e.key==='onsite')tx=w+' ถึงหน้างาน เริ่มตรวจสอบ';
+      else if(e.key==='done')tx='แก้ไขแล้วเสร็จ / ปิดงาน ('+w+')'+(T.__cr&&e.dt?' · รวม '+fmt(mins(T.__cr,e.dt)):'');
+      else tx=SHORT[e.key]+' ('+w+')';
+    }else{var t=e.text;md='😐';
+      if(BL.test(t)){tx='พบอุปสรรค: เข้าพื้นที่ไม่ได้ (พื้นที่เสี่ยงภัย)';md='😟'}
+      else if(CUT.test(t)){var mc=t.match(CUT);tx='ตรวจพบสายขาดราว '+mc[1]+' กม. ช่วง '+mc[2]+'–'+mc[3];md='😮'}
+      else if(/^\s*สาเหตุ/.test(t)){tx='ตรวจพบสาเหตุ: '+t.replace(/^\s*สาเหตุ\s*:?\s*/,'').replace(/\s+/g,' ');md='😌'}
+      else if(/เจอจุด|พบจุดขาด/.test(t)){var cz3=(t.match(/สาเหตุ\s*(.+)/)||[])[1];tx='พบจุดขาดจริง'+(cz3?' · สาเหตุ: '+cz3.replace(/\s+/g,' ').trim():'');md='😌'}
+      else if(/^\s*(แก้ไข|แก้โดย|วิธีแก้)/.test(t)){tx='ดำเนินการแก้ไข: '+t.replace(/^\s*(แก้ไข|แก้โดย|วิธีแก้)\s*:?\s*/,'');md='😎'}
+      else tx='บันทึก: '+t}
+    tlT.push('- '+tm+' – '+tx+(md?' '+md:''));
+  });
+  tlT.push('- (ไม่มีเวลา) – ยืนยันระบบกลับมาปกติ: ไม่มีบันทึกในข้อความ ควรเพิ่มเวลายืนยันสัญญาณ/ลิงก์กลับมาปกติ ⚠️');
+  var slTxt=typeof left==='number'?(left>=0?'ทันกำหนด ✅ (ใช้ '+fmt(used)+' จาก '+fmt(LIM)+' เหลือ '+fmt(left)+')':'เกินกำหนด ❌ (ใช้ '+fmt(used)+' เกิน '+fmt(-left)+')'):'ไม่ระบุ';
+  var pf=[];
+  if(nAsg>nAcc&&nAcc>0)pf.push('การจ่ายงานซ้ำก่อนมีผู้รับ ('+nAsg+' ครั้ง รับจริง '+nAcc+') ควรทบทวนกลไกเตือนเมื่อไม่มีผู้รับงาน');
+  if(gapAD!=null&&gapAD>=30)pf.push('ช่วงรับงานถึงออกเดินทางใช้ '+fmt(gapAD)+' ควรทบทวนการเตรียมวัสดุ/อุปกรณ์ก่อนออกเดินทาง');
+  if(blocked)pf.push('เข้าพื้นที่เสี่ยงภัยไม่ได้ทันที ควรทบทวนการตรวจสอบสิทธิ์/แท็กพื้นที่ก่อนจ่ายงาน');
+  if(typeof left==='number'&&left>=0&&left<30)pf.push('ปิดงานเฉียดเส้น SLA ควรทบทวนการติดตามเวลาระหว่างงาน (เช่น เตือนที่ 60% และ 80% ของ SLA)');
+  if(!czr)pf.push('ไม่มีบันทึกสาเหตุในใบงาน ควรให้ช่างระบุทุกครั้ง');
+  var sh=[],lg=[];pvx.forEach(function(x){var s=cl(x);(/สำรอง|บันทึกจุด|สำรวจ|ซ้ำหลัง|ตัวกันแมลง|จัดชุด|ระบุสาเหตุ|อุดซีล/.test(s)?lg:sh).push(s)});
+  var typ=((cm||/ขาด/.test(czr))?'สายสัญญาณขาด':'')+(HDR&&HDR.alarm?(((cm||/ขาด/.test(czr))?' · ':'')+HDR.alarm):'');
+  var areaTxt=(HDR&&HDR.site?'สถานี '+HDR.site:'')+(HDR&&HDR.site&&whereTxt?' · ':'')+whereTxt;
+  var numL=function(a){return a.length?a.map(function(s,i){return '   '+(i+1)+'. '+s}):['   - (ระบุเพิ่ม)']};
+  rp=['📋 INCIDENT REPORT','รายงานสรุปเหตุการณ์และวิเคราะห์สาเหตุ','',one,'',
+    '1. ข้อมูลเหตุการณ์',
+    '- Incident / Job ID: '+(HDR&&HDR.job||'________'),
+    '- วันที่เกิดเหตุ: '+(when0||'________'),
+    '- พื้นที่ได้รับผลกระทบ: '+(areaTxt||'________'),
+    '- ประเภทเหตุการณ์: '+(typ||'________'),
+    '- ระดับความรุนแรง: '+(HDR&&HDR.sev?HDR.sev+(/critical/i.test(HDR.sev)?' (SLA ไม่เกิน 3 ชม.)':''):'________'),
+    '- ผู้รับผิดชอบ: '+(main||(HDR&&HDR.to)||'________')+(HDR&&HDR.by?' (สั่งงานโดย '+HDR.by+')':''),
+    '','2. รายละเอียดเหตุการณ์',
+    '- เกิดอะไรขึ้น: '+whatTxt+(when0?' เมื่อ '+when0:''),
+    '- เกิดที่ไหน: '+(areaTxt||'-'),
+    '- ตรวจพบได้อย่างไร: '+(HDR&&HDR.alarm?'ระบบแจ้งเตือน '+HDR.alarm+' และเปิดใบงาน':'เปิดใบงานแจ้งปัญหา')+(cmE&&cm?' · ช่างวัดสัญญาณหน้างานพบสายขาดราว '+cm[1]+' กม.':'')+(czr?' · สาเหตุที่ช่างบันทึก: '+czr:''),
+    '','3. Timeline (ลำดับเหตุการณ์)'].concat(tlT,['','4. Root Cause Analysis',
+    '- สาเหตุหลัก: '+(czr||'ยังไม่มีบันทึกสาเหตุ'),
+    '- ปัจจัยสนับสนุน: '+(fac.length?fac.join(' · '):'-'),
+    '- สาเหตุที่ทำให้เกิดความล่าช้า:'],
+    dl3.length?dl3.map(function(x){return '   - '+x.replace(/^\S+\s/,'')}):['   - ไม่พบจุดล่าช้าชัดเจนจากข้อมูล'],
+    ['- ข้อบกพร่องของกระบวนการ (ประเด็นที่ควรทบทวน):'],
+    pf.length?pf.map(function(x){return '   - '+x}):['   - ไม่พบจากข้อมูลที่ให้'],
+    ['ℹ️ วิเคราะห์ที่สาเหตุและขั้นตอนงาน ไม่ได้หาผู้ผิด','','5. Impact Analysis',
+    '- จำนวนลูกค้าที่ได้รับผลกระทบ: '+(svcTxt?svcTxt+' ('+HDR.svc+')':'ไม่ระบุในข้อความ')+(HDR&&HDR.imp?' · โหนด/ลูกค้าที่เกี่ยวข้อง: '+HDR.imp+' (Site Priority '+HDR.pri+')':''),
+    '- อุปกรณ์ / ระบบที่ได้รับผลกระทบ: '+(HDR&&HDR.ends?'ลิงก์ '+whereTxt+' · LOS ทั้งสองฝั่ง':(cm?'สัญญาณขาดช่วง '+whereTxt:'ไม่ระบุ')),
+    '- ระยะเวลาที่เกิดปัญหา: '+(total!=null&&!isNaN(total)?fmt(total)+' (นับจากเปิดใบงานถึงปิดงาน)':'ยังไม่ปิดงาน'),
+    '- ผลกระทบต่อ SLA: '+slTxt,
+    '','6. Corrective Action'],
+    ac.map(function(x){return '- '+x}),
+    ['','7. Preventive Action','- มาตรการระยะสั้น:'],numL(sh),['- มาตรการระยะยาว:'],numL(lg),
+    ['- ผู้รับผิดชอบ: ________','- กำหนดแล้วเสร็จ: ________','','8. Final Conclusion',
+    '- สรุปเหตุการณ์: '+whatTxt+(when0?' เกิดเมื่อ '+when0:'')+(dn?' · ปิดงาน '+whenEnd:''),
+    '- สาเหตุ: '+(czr||'ยังไม่ระบุ'),
+    '- ผลกระทบ: '+(svcTxt||'ไม่ระบุ')+' · SLA: '+slTxt,
+    '- ผลการแก้ไข: '+(fxr||(dn?'ปิดงานเรียบร้อย':'ยังไม่ปิดงาน')),
+    '- ข้อเสนอแนะ: '+(pvx.slice(0,2).map(cl).join(' / ')||'ระบุเพิ่มเติม'),
+    '','📝 หมายเหตุ: ข้อมูลจากข้อความในใบงาน แนวทางป้องกันเป็นข้อเสนอ ควรใส่ผู้รับผิดชอบและกำหนดเวลาก่อนส่ง']);
+  var NT=[],cd2=null,T2={},lastSiteDt=null,nA2=0,prevAsgDt=null;
+  evs.forEach(function(e){
+    if(e.date!==cd2){cd2=e.date;if(NT.length)NT.push('');NT.push('📅 '+(e.date||'ไม่ระบุวันที่'));NT.push('')}
+    var lead,ex,md='',w=e.who;
+    if(e.type==='act'){
+      T2[w+'|'+e.key]=e.dt;lead=LINEIC[e.key];md=MOOD[e.key]||'';
+      if(e.key==='created'){ex='เปิดใบงานเข้าระบบ';T2.__c=e.dt}
+      else if(e.key==='assigned'){nA2++;
+        if(nA2===1){var d1=e.dt&&T2.__c?mins(T2.__c,e.dt):null;ex='จ่ายงานให้ช่างคนแรก'+(d1!=null?' · รอจ่ายงาน '+fmt(d1):'')}
+        else{var d2=e.dt&&prevAsgDt?mins(prevAsgDt,e.dt):null;ex='เปลี่ยนช่าง ส่งต่อให้ '+w.split(' ')[0]+(d2!=null?' · ห่างจากครั้งก่อน '+fmt(d2):'')}
+        prevAsgDt=e.dt}
+      else if(e.key==='accepted'){var a1=mins(T2[w+'|assigned'],e.dt);ex='ช่างรับงาน'+(a1!=null?' · รอรับงาน '+fmt(a1):'')}
+      else if(e.key==='departed'){var a2=mins(T2[w+'|accepted'],e.dt);ex='ช่างออกเดินทาง'+(a2!=null?' · เตรียมตัว '+fmt(a2):'')}
+      else if(e.key==='onsite'){lastSiteDt=e.dt;var a3=mins(T2[w+'|departed'],e.dt);ex='ช่างถึงหน้างาน'+(a3!=null?' · เดินทาง '+fmt(a3):'')}
+      else if(e.key==='done'){var a4=mins(T2[w+'|onsite'],e.dt),a5=T2.__c&&e.dt?mins(T2.__c,e.dt):null;ex='ปิดงานเรียบร้อย'+(a4!=null?' · ทำงานหน้างาน '+fmt(a4):'')+(a5!=null?' · รวมทั้งงาน '+fmt(a5):'');md=' 🛠️🎉 '+md}
+      else ex=SHORT[e.key];
+      NT.push('* '+lead+' '+e.time+' >> '+e.raw+' '+w+' ('+ex+') '+md);
+    }else{
+      var t=e.text,r2=lastSiteDt&&e.dt?mins(lastSiteDt,e.dt):null;lead='💬';md='😐';
+      if(BL.test(t)){lead='🚫';ex='เข้าพื้นที่ไม่ได้ เพราะเป็นพื้นที่เสี่ยงภัย';md='😟'}
+      else if(CUT.test(t)){var mc2=t.match(CUT);lead='📉';ex='เครื่องวัดบอกว่าสายขาดห่างไปราว '+mc2[1]+' กม. ช่วง '+mc2[2]+'–'+mc2[3]+(r2!=null?' · หลังถึงหน้างาน '+fmt(r2):'');md='😮'}
+      else if(/^\s*สาเหตุ/.test(t)){lead='🔍';ex='สาเหตุที่ช่างแจ้ง';md='😌'}
+      else if(/เจอจุดขาด|พบจุดขาด/.test(t)){lead='🔍';ex='เจอจุดที่สายขาด'+(r2!=null?' · หลังถึงหน้างาน '+fmt(r2):'');md='😌'}
+      else if(/^\s*(แก้ไข|แก้โดย|วิธีแก้)/.test(t)){lead='🔧';ex='วิธีที่ช่างแก้';md='😎'}
+      else ex='บันทึกเพิ่มเติม';
+      NT.push('* '+lead+' '+(e.time?e.time+' >> ':'')+t+' ('+ex+') '+md);
+    }
+  });
+  var fd=function(m){m=Math.round(m);var h=Math.floor(m/60),n=m%60;return h?(h+' ชั่วโมง'+(n?' '+n+' นาที':'')):n+' นาที'};
+  var SY=[],S1='';
+  if(cr)S1='เมื่อ '+cr.time+' น. ของวันที่ '+cr.date+' มีการเปิดใบงาน'+(HDR&&HDR.job?' '+HDR.job:'');
+  if(HDR&&HDR.alarm)S1+=' เรื่อง '+HDR.alarm+(HDR.ends?' ที่ลิงก์ '+HDR.ends[0]+' ↔ '+HDR.ends[1]:'');
+  else if(cm)S1+=' เรื่องสายขาดช่วง '+cm[2]+'–'+cm[3];
+  if(HDR&&HDR.sev)S1+=' ระดับ '+HDR.sev+(LIM?' ต้องเสร็จภายใน '+fd(LIM)+(HDR.dl?' (ก่อน '+hm(HDR.dl)+' น.)':''):'');
+  if(HDR&&HDR.svc)S1+=' · '+(/Unaffected/i.test(HDR.svc)?'ไม่กระทบบริการลูกค้า':'กระทบบริการลูกค้า');
+  if(S1)SY.push('🎬 '+S1);
+  var S2='';
+  if(fa){var g0=cr&&cr.dt&&fa.dt?mins(cr.dt,fa.dt):null;S2='ระบบจ่ายงานให้ช่าง '+fa.who+(g0!=null?' ภายใน '+fd(g0):'')}
+  var nonA=asgList.filter(function(x){return !accepted[x.who]}).map(function(x){return x.who}),ltA=asgList.filter(function(x){return accepted[x.who]});
+  if(nonA.length&&ltA.length)S2+=' แต่ '+nonA.join(' และ ')+' ไม่มีบันทึกว่ารับงาน ต่อมามีการจ่ายงานใหม่ให้ '+ltA.map(function(x){return x.who+' ตอน '+x.time+' น.'}).join(' และ ');
+  if(main&&acc){var g1=T[main+'|assigned']&&acc.dt?mins(T[main+'|assigned'],acc.dt):null;S2+=(S2?' และ ':'')+main+' กดรับงานตอน '+acc.time+' น.'+(g1!=null?' (รอรับงาน '+fd(g1)+')':'')}
+  if(S2)SY.push('📨 '+S2);
+  var S3='';
+  if(main&&dep){var g2=acc?mins(acc.dt,dep.dt):null;S3=main+' ออกเดินทางตอน '+dep.time+' น.'+(g2!=null?' (หลังรับงาน '+fd(g2)+')':'')}
+  if(site){var g3=dep?mins(dep.dt,site.dt):null;S3+=(S3?' และ':(main||'ช่าง')+' ')+'ถึงหน้างานตอน '+site.time+' น.'+(g3!=null?' ใช้เวลาเดินทาง '+fd(g3):'')}
+  if(gapAD!=null&&gapAD>=30)S3+=' ช่วงรับงานถึงออกเดินทางนาน '+fd(gapAD)+' ยังไม่ทราบสาเหตุ ควรสอบถามช่าง';
+  if(S3)SY.push('🚗 '+S3);
+  var S4='';
+  if(blocked)S4+='ช่างแจ้งว่าเข้าพื้นที่ไม่ได้ เพราะเป็นพื้นที่เสี่ยงภัย (Red Zone) ';
+  if(cm)S4+='เมื่อวัดสัญญาณ พบว่าสายขาดห่างไปราว '+cm[1]+' กม. ช่วง '+cm[2]+'–'+cm[3]+' ';
+  if(czr)S4+='ช่างตรวจพบสาเหตุคือ '+czr+' ';
+  if(fxr)S4+='วิธีที่แก้ไข: '+fxr+' ';
+  if(am||tm2)S4+='(สรุปงาน: '+(am?'สาย ARSS '+am[1]+' เมตร '+am[2]+' คอร์':'')+(am&&tm2?' ':'')+(tm2?'ตัดต่อ '+tm2[1]+' หัวต่อ'+(tm2[2]?'ถาวร':''):'')+') ';
+  if(site&&dn)S4+='ช่างอยู่ที่หน้างานรวม '+fd(mins(site.dt,dn.dt));
+  if(S4.trim())SY.push('🔧 '+S4.trim());
+  var S5=dn?'ปิดงานตอน '+dn.time+' น. รวมใช้เวลา '+fd(total)+' นับจากเปิดใบงาน':'ขณะนี้งานยังไม่ปิด';
+  if(typeof left==='number'&&LIM)S5+=' · '+(left>=0?'ทันตามเกณฑ์ '+HDR.sev+' (ใช้ไป '+Math.round(used/LIM*100)+'% ของเวลา เหลืออีก '+fd(left)+')':'เกินเกณฑ์ '+HDR.sev+' '+fd(-left));
+  SY.push('🏁 '+S5);
+  if(stg.length){var nm=function(s){return s.replace('ซ่อมหน้างาน','ทำงานที่หน้างาน').replace('รอตอบรับ','รอช่างรับงาน')};SY.push('⏳ ขั้นตอนที่ใช้เวลามากที่สุดคือ '+nm(stg[0][0])+' '+fd(stg[0][1])+(total>0?' (ประมาณ '+Math.round(stg[0][1]/total*100)+'% ของเวลาทั้งหมด)':'')+(stg[1]&&stg[1][1]>=20?' รองลงมาคือ '+nm(stg[1][0])+' '+fd(stg[1][1]):''))}
+  var STORY=['','📖 เล่าเหตุการณ์ (สำหรับแจ้งหัวหน้า)'].concat(SY.reduce(function(a,x){return a.concat(['',x])},[]));
+  var BS=['','📣 สรุปให้หัวหน้า'];
+  BS.push('🔍 สาเหตุ: '+(czr||'ยังไม่มีบันทึกสาเหตุในใบงาน'));
+  BS.push('🔧 แก้ไข: '+(fxr||(dn?'ปิดงานแล้ว แต่ไม่มีบันทึกวิธีแก้':'ยังไม่ปิดงาน'))+((am||tm2)?' ('+(am?'สาย ARSS '+am[1]+' เมตร '+am[2]+' คอร์':'')+(am&&tm2?' · ':'')+(tm2?'ตัดต่อ '+tm2[1]+' หัวต่อ'+(tm2[2]?'ถาวร':''):'')+')':''));
+  var dly=[];
+  if(stg.length)dly.push('ขั้นตอนที่ใช้เวลามากที่สุด: '+nm(stg[0][0])+' '+fd(stg[0][1]));
+  if(gapAD!=null&&gapAD>=30)dly.push('หลังรับงานถึงออกเดินทางนาน '+fd(gapAD)+' (ยังไม่ทราบสาเหตุ ควรถามช่าง)');
+  if(nAsg>nAcc&&nAcc>0&&acc&&asgList[0]&&asgList[0].dt)dly.push('จ่ายงานครั้งแรกตอน '+asgList[0].time+' น. กว่าจะมีคนรับงานตอน '+acc.time+' น. ผ่านไป '+fd(mins(asgList[0].dt,acc.dt))+' (มีการจ่ายงานใหม่)');
+  if(blocked)dly.push('เข้าพื้นที่เสี่ยงภัยไม่ได้ในช่วงแรก');
+  if(!dly.length)dly.push('ไม่พบจุดล่าช้าชัดเจนจากข้อมูล');
+  BS.push('⏳ เหตุผลที่ล่าช้า:');dly.forEach(function(x){BS.push('   - '+x)});
+  var obs=[];
+  if(typeof left==='number'&&LIM)obs.push(left>=0?'ปิดงานทันเกณฑ์ '+HDR.sev+' เหลือเวลา '+fd(left)+(left<30?' (เฉียดเส้น)':''):'ปิดงานเกินเกณฑ์ '+HDR.sev+' '+fd(-left));
+  if(czE&&!czE.time)obs.push('บันทึกสาเหตุ/วิธีแก้ไม่มีเวลากำกับ จึงไม่ทราบว่าพบสาเหตุตอนไหน');
+  if(dn&&HDR&&(HDR.alarm||HDR.ends))obs.push('ไม่มีเวลายืนยันว่าลิงก์/สัญญาณกลับมาปกติ ควรเพิ่มในบันทึก');
+  if(nonA.length&&ltA.length)obs.push('มีช่างที่ได้รับมอบหมายแต่ไม่มีบันทึกรับงาน ('+nonA.join(', ')+')');
+  if(!obs.length)obs.push('ไม่มีข้อสังเกตเพิ่มเติม');
+  BS.push('👀 ข้อสังเกต:');obs.forEach(function(x){BS.push('   - '+x)});
+  BS.push('🛡️ วิธีป้องกัน:');
+  (pvx.length?pvx:['   - (ระบุเพิ่มเติม)']).forEach(function(x,i){BS.push('   '+(i+1)+'. '+cl(x))});
+  BS.push('   ผู้รับผิดชอบ: ________   กำหนดเสร็จ: ________');
+  function sp(a){return a.map(function(x){return x.replace(/^\* /,'')})}
+  var RR={rp:sp(rp),tl:sp(L.slice(0,tlEnd)),sm:sp(bossL.concat(L.slice(tlEnd,smEnd).concat(os))),an:sp(L.slice(smEnd).concat(A)),smD:sp(bossL.concat(['','💡 สรุปเหตุการณ์ (เล่าเรื่องแบบละเอียด):'].concat(q.reduce(function(a,x){return a.concat(['',x])},[]).concat(os)))),anD:sp(['','🔬 วิเคราะห์เชิงลึก:'].concat(Ad))};RR.tl=sp(NT);RR.sm=RR.smD=sp(STORY);RR.bs=RR.bsD=sp(BS);return RR;
+}
+inp.addEventListener("input",render);$("ttl").addEventListener("input",render);
+$("ex").onclick=function(){inp.value=SAMPLE;render()};
+$("cl").onclick=function(){inp.value="";render()};
+$("cp").onclick=function(){
+  var s=($("full")&&$("full").value)||window._full||"";if(!s)return;
+  try{navigator.clipboard.writeText(s).then(function(){$("cp").textContent="✔️ คัดลอกแล้ว"},function(){fb(s)})}catch(e){fb(s)}
+  setTimeout(function(){$("cp").textContent="📋 คัดลอกสรุป"},1500);
+};
+function fb(s){var t=document.createElement("textarea");t.value=s;document.body.appendChild(t);t.select();try{document.execCommand("copy")}catch(e){}document.body.removeChild(t)}
+function est(){
+  var c=+$("e_core").value,L=+$("e_len").value||0,j=Math.max(1,Math.floor(+$("e_j").value||1)),rd=Math.max(0,Math.floor(+$("e_rd").value||0)),ly=+$("e_lay").value||0;
+  var sp1=c*0.5,tSp=j*sp1,tTd=j*15,tRd=rd*15,tLy=(L/50)*ly,tot=tSp+tTd+tRd+tLy;
+  var rows=[['✂️ ตัดต่อ core ('+j+' หัว × '+c+' core × 30 วิ)',tSp],['📦 เก็บหัวต่อ ('+j+' หัว × 15 นาที)',tTd],['🚧 ข้ามถนน ('+rd+' เส้น × 15 นาที · ใช้ ≥4 คน)',tRd],['🧵 ลากคร่อม '+L+' ม.'+(ly?'':' (ยังไม่รวม: กรอกนาที/50 ม.)'),tLy]];
+  var h='<table style="width:100%;border-collapse:collapse;font-size:.85rem">'+rows.map(function(r){return '<tr><td>'+r[0]+'</td><td style="text-align:right;white-space:nowrap">'+(r[1]?'≤ '+fmt(r[1]):'-')+'</td></tr>'}).join('')+'<tr style="border-top:1px solid var(--bd);font-weight:700"><td>รวมประมาณการ (เวลามากสุดที่ไม่ติดขัด)</td><td style="text-align:right;white-space:nowrap">≤ '+fmt(tot)+'</td></tr></table>';
+  var ins=[],top=rows.slice().sort(function(a,b){return b[1]-a[1]})[0];
+  if(tot>0)ins.push('🔎 ส่วนที่ใช้เวลามากสุด: '+top[0].replace(/ \(.*/,'')+' ('+Math.round(top[1]/tot*100)+'%)');
+  if(c>=48)ins.push('💡 ข้อเสนอ: '+c+' core ต่อหัวละ ≤ '+fmt(sp1)+' พิจารณาแบ่งช่างต่อหลายชุดพร้อมกัน เพื่อลดเวลา');
+  if(rd>0)ins.push('🚦 ข้ามถนน '+rd+' เส้น ควรนัดคนโบกรถ (≥4 คน) และอุปกรณ์จราจรไว้ก่อนถึงหน้างาน');
+  if(!ly)ins.push('ℹ️ ยังไม่รวมเวลาลากสาย เพราะทีมยังไม่ได้กำหนดนาทีต่อ 50 ม. เมื่อมีข้อมูลจริงให้กรอกในช่องด้านบน');
+  if(window._act!=null)ins.push('⏱️ เวลาหน้างานจริง (On-Site→Done) '+fmt(window._act)+' · ประมาณการ ≤ '+fmt(tot)+' → '+(window._act>=tot?'จริงมากกว่า '+fmt(window._act-tot)+' (เวลาส่วนนี้อาจใช้กับหาจุดขาด ลากสาย เตรียมงาน หรือความติดขัด ควรยืนยันกับช่าง)':'จริงน้อยกว่าประมาณ '+fmt(tot-window._act)+' (อาจทำเร็วกว่าเกณฑ์ หรือจำนวน core/หัวต่อในช่องไม่ตรงกับงานจริง)'));
+  var t2='<div style="margin-top:10px;font-weight:600;font-size:.85rem">📊 ตารางอ้างอิง ('+j+' หัว ยังไม่รวมลากสาย/ข้ามถนน)</div><table style="width:100%;border-collapse:collapse;font-size:.82rem"><tr><th>core</th><th>ต่อ/หัว</th><th>+เก็บหัวต่อ</th><th>รวม '+j+' หัว</th></tr>'+[12,24,48,60,96].map(function(k){var s=k*0.5;return '<tr'+(k===c?' style="font-weight:700;background:var(--chip)"':'')+'><td>'+k+'</td><td>≤ '+fmt(s)+'</td><td>≤ '+fmt(s+15)+'</td><td>≤ '+fmt(j*(s+15))+'</td></tr>'}).join('')+'</table><div style="margin-top:6px;font-size:.78rem;color:var(--mut)">เกณฑ์เป็นเวลามากสุดในกรณีไม่ติดขัด งานจริงอาจใช้เวลามากกว่านี้เมื่อมีอุปสรรค</div>';
+  $("e_out").innerHTML=h+'<div style="margin-top:8px;font-size:.85rem">'+ins.map(function(x){return '<div>'+x+'</div>'}).join('')+'</div>'+t2;
+}
+function tcalc(c,L,j,rd,ly,P,T){var r=Math.ceil(j/T),s=c*0.5;var o={r:r,tSp:r*s,tTd:r*TIDY(),tLy:layMax(L)*(ly/10)*(2/P),tLyMin:layMin(L)*(ly/10)*(2/P),tRd:rd*15,ppl:P};o.tot=o.tSp+o.tTd+o.tLy+o.tRd;o.totMin=o.tot-o.tLy+o.tLyMin;return o}
+function TIDY(){var e=$("e_tidy");return e?(+e.value||0):24}
+function layMin(L){var n=Math.ceil(L/50);return n>0?10+5*(n-1):0}
+function layMax(L){var n=Math.ceil(L/50);return n<=0?0:(n<=4?[10,20,20,30][n-1]:30+(n-4)*5)}
+function fm(m){m=Math.round(m);return m>=60?Math.floor(m/60)+' ชม.'+(m%60?' '+(m%60)+' น.':''):m+' น.'}
+function est(){
+  var c=+$("e_core").value,L=+$("e_len").value||0,j=Math.max(1,Math.floor(+$("e_j").value||1)),rd=Math.max(0,Math.floor(+$("e_rd").value||0)),ly=+$("e_lay").value||0;
+  var tp=($("e_team").value||'2,1').split(','),P=+tp[0],T=+tp[1];
+  var o=tcalc(c,L,j,rd,ly,P,T),tot=o.tot,sp1=c*0.5;
+  var rows=[['✂️ ตัดต่อ core ('+j+' หัว ÷ '+T+' ทีม = '+o.r+' รอบ × '+c+' core × 30 วิ)',o.tSp],['📦 เก็บหัวต่อ+ปลอกสาย ('+o.r+' รอบ × '+TIDY()+' นาที)',o.tTd],['🚧 ข้ามถนน ('+rd+' เส้น × 15 นาที · ใช้ ≥4 คน)',o.tRd],['🧵 ลากคร่อม '+L+' ม. ('+(ly?Math.ceil(L/50)+' ช่วง · ทีม 2 คน '+fmt(layMin(L)*ly/10)+(layMax(L)!==layMin(L)?'–'+fmt(layMax(L)*ly/10):'')+(o.ppl>2?' · ลดตามกำลังคน '+o.ppl+' คน':''):'ยังไม่รวม: กรอกนาที/50 ม.')+')',o.tLy]];
+  var h='<table style="width:100%;border-collapse:collapse;font-size:.85rem">'+rows.map(function(r){return '<tr><td>'+r[0]+'</td><td style="text-align:right;white-space:nowrap">'+(r[1]?'≤ '+fmt(r[1]):'-')+'</td></tr>'}).join('')+'<tr style="border-top:1px solid var(--bd);font-weight:700"><td>รวมประมาณการ (เวลามากสุดที่ไม่ติดขัด)</td><td style="text-align:right;white-space:nowrap">≤ '+fmt(tot)+'</td></tr></table>';
+  var ins=[],top=rows.slice().sort(function(a,b){return b[1]-a[1]})[0];
+  if(tot>0)ins.push('🔎 ส่วนที่ใช้เวลามากสุด: '+top[0].replace(/ \(.*/,'')+' ('+Math.round(top[1]/tot*100)+'%)');
+  if(rd>0&&o.ppl<4)ins.push('⚠️ ข้ามถนนต้องใช้ ≥4 คน ทีมนี้มี '+o.ppl+' คน ต้องขอกำลังเสริมหรือรวมทีม (เวลารอกำลังเสริมยังไม่นับ)');
+  if(rd>0&&o.ppl>=4)ins.push('🚦 ข้ามถนน '+rd+' เส้น กำลังคนพอ แต่ควรเตรียมคนโบกรถและอุปกรณ์จราจรไว้ก่อนถึงหน้างาน');
+  if(T>=2&&j>=2){var o1=tcalc(c,L,j,rd,ly,P,1);ins.push('👥 '+T+' ทีม รับคนละหัวต่อพร้อมกัน ลดเวลาต่อ+เก็บหัวต่อจาก '+fmt(o1.tSp+o1.tTd)+' เหลือ '+fmt(o.tSp+o.tTd)+' (ต้องมีเครื่องต่อใยแก้วครบทุกทีม)')}
+  if(T>=2&&j<T)ins.push('ℹ️ มี '+j+' หัวต่อ ทีมที่เหลือช่วยลากสาย/ข้ามถนน ไม่ช่วยต่อ core');
+  if(T===1&&P>2)ins.push('👥 เพิ่มคนในทีมช่วยลากสาย/ข้ามถนน แต่ไม่ช่วยเร่งการต่อ core (1 หัวต่อต่อโดยทีมเดียว ไม่แบ่ง core)');
+  if(c>=48)ins.push('💡 '+c+' core ต่อหัวละ ≤ '+fmt(sp1)+(j>=2&&T>=2?' ให้แต่ละทีมรับคนละหัว (ไม่แบ่ง core ในหัวเดียวกัน)':' ถ้ามีหลายหัวต่อ แนะนำให้แต่ละทีมรับคนละหัว'));
+  if(ly&&L>50)ins.push('📏 ลากคร่อม '+L+' ม. ทีม 2 คนใช้ราว '+fmt(layMin(L)*ly/10)+'–'+fmt(layMax(L)*ly/10)+' (รวมข้างบนใช้ค่ามากสุด) ถ้าลากได้ตามค่าต่ำสุด รวมทั้งงานเหลือ ≈ '+fmt(o.totMin)+(L>200?' · เกิน 200 ม. เป็นการประมาณ +5 นาที/50 ม.':''));
+  if(!ly)ins.push('ℹ️ ยังไม่รวมเวลาลากสาย กรอกนาที/50 ม. ของทีม 2 คน ระบบจะลดตามจำนวนคนให้');
+  if(window._act!=null)ins.push('⏱️ เวลาหน้างานจริง (On-Site→Done) '+fmt(window._act)+' · ประมาณการ ≤ '+fmt(tot)+' → '+(window._act>=tot?'จริงมากกว่า '+fmt(window._act-tot)+' (อาจใช้กับหาจุดขาด ลากสาย เตรียมงาน หรือความติดขัด ควรยืนยันกับช่าง)':'จริงน้อยกว่าประมาณ '+fmt(tot-window._act)+' (อาจทำเร็วกว่าเกณฑ์ หรือจำนวน core/หัวต่อในช่องไม่ตรงกับงานจริง)'));
+  var cfg=[['2 คน (1 ทีม)','2,1'],['3 คน (1 ทีม)','3,1'],['4 คน (2+2)','4,2'],['5 คน (3+2)','5,2']],base=tcalc(c,L,j,rd,ly,2,1).tot;
+  var t3='<div style="margin-top:10px;font-weight:600;font-size:.85rem">👥 เปรียบเทียบกำลังคน (งานเดียวกัน)</div><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.78rem"><tr><th>กำลังคน</th><th>ต่อ+เก็บ</th><th>ลาก</th><th>ถนน</th><th>รวม</th><th>เร็วขึ้น</th></tr>'+cfg.map(function(x){var q=x[1].split(','),w=tcalc(c,L,j,rd,ly,+q[0],+q[1]),sel=x[1]===$("e_team").value;return '<tr'+(sel?' style="font-weight:700;background:var(--chip)"':'')+'><td>'+x[0]+(rd>0&&w.ppl<4?' *':'')+'</td><td>'+fm(w.tSp+w.tTd)+'</td><td>'+(ly?fm(w.tLy):'-')+'</td><td>'+(rd?fm(w.tRd):'-')+'</td><td>'+fm(w.tot)+'</td><td>'+(base>0?Math.max(0,Math.round((1-w.tot/base)*100))+'%':'-')+'</td></tr>'}).join('')+'</table></div><div style="margin-top:4px;font-size:.75rem;color:var(--mut)">'+(rd>0?'* ข้ามถนนต้องใช้ ≥4 คน ทีมนี้ต้องขอกำลังเสริม · ':'')+'ข้อสมมติ: แต่ละทีมรับคนละหัวต่อ (ไม่แบ่ง core ในหัวเดียวกัน) · ทีมมาตรฐาน 2 หรือ 3 คน (4 คน = 2+2, 5 คน = 3+2) · ลากสายเร็วขึ้นตามจำนวนคน (จริงอาจได้ผลน้อยลงเมื่อคนแน่น) · งานแต่ละช่วงทำต่อกันตามลำดับ</div>';
+  var t2='<div style="margin-top:10px;font-weight:600;font-size:.85rem">📊 ตารางอ้างอิงแต่ละ core ('+j+' หัว 1 ทีม)</div><table style="width:100%;border-collapse:collapse;font-size:.8rem"><tr><th>core</th><th>ต่อ/หัว</th><th>+เก็บหัวต่อ</th><th>รวม '+j+' หัว</th></tr>'+[12,24,48,60,96].map(function(k){var s=k*0.5;return '<tr'+(k===c?' style="font-weight:700;background:var(--chip)"':'')+'><td>'+k+'</td><td>≤ '+fm(s)+'</td><td>≤ '+fm(s+TIDY())+'</td><td>≤ '+fm(j*(s+TIDY()))+'</td></tr>'}).join('')+'</table>';
+  $("e_out").innerHTML=h+'<div style="margin-top:8px;font-size:.85rem">'+ins.map(function(x){return '<div>'+x+'</div>'}).join('')+'</div>'+t3+t2;
+}
+["e_core","e_len","e_j","e_rd","e_tidy","e_lay","e_team"].forEach(function(id){$(id).addEventListener("input",est);$(id).addEventListener("change",est)});
+$("e_auto").onclick=function(){
+  var t=inp.value,m=t.match(/arss\s*(\d+)\s*m\s*(\d+)\s*c/i),jm=t.match(/ตัดต่อ\s*(\d+)\s*หัวต่อ/),rm=t.match(/ข้ามถนน\s*(\d+)/);
+  if(m){$("e_len").value=m[1];var sel=$("e_core");sel.value=m[2];if(sel.value!==m[2]){var o=document.createElement("option");o.textContent=m[2];sel.appendChild(o);sel.value=m[2]}}
+  if(jm)$("e_j").value=jm[1];
+  if(rm)$("e_rd").value=rm[1];
+  var evs=parse(t),s=null,d=null;evs.forEach(function(e){if(e.type==="act"&&e.key==="onsite")s=e;if(e.type==="act"&&e.key==="done")d=e});
+  window._act=(s&&d&&s.dt&&d.dt)?mins(s.dt,d.dt):null;
+  est();
+};
+inp.addEventListener("input",function(){window._act=null});
+est();
+inp.value=SAMPLE;render();
+</script>
+</body>
+</html>
